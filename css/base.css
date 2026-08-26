@@ -1,4 +1,14 @@
 *{box-sizing:border-box}
+
+/* ===== transição suave entre páginas ===== */
+/* Chrome/Edge recentes cuidam da troca de página sozinhos com essa única
+   regra (view transition entre documentos) — sem nenhum JS. Navegador que
+   não conhece @view-transition simplesmente ignora a regra, sem quebrar
+   nada — por isso não precisa de nenhum "if" pra checar suporte aqui. */
+@view-transition{
+  navigation:auto;
+}
+
 body{
   margin:0; background:var(--paper);
   background-image:
@@ -12,9 +22,16 @@ body{
   font-family:"Nunito",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   font-size:clamp(16px,4.5vw,18px); line-height:1.6; -webkit-font-smoothing:antialiased;
   padding:0 16px 40px;
+  transition:opacity .18s ease;
 }
 @media (max-width:480px){
   body{padding:0 14px 40px}
+}
+/* fallback pra navegador sem @view-transition: fade simples de saída (classe
+   ligada por js/transicao.js) e de entrada (via @starting-style, sem JS) */
+body.saindo{opacity:0}
+@starting-style{
+  body{opacity:0}
 }
 .wrap{max-width:var(--maxw);margin:0 auto}
 h1,h2,h3{font-family:"Gluten","Nunito",system-ui,sans-serif;font-weight:800;line-height:1.06;margin:0;text-wrap:balance;letter-spacing:-.01em}
@@ -119,4 +136,8 @@ footer a{color:var(--clay);font-weight:700}
 /* ===== animacao ===== */
 .rise{opacity:0;transform:translateY(14px)}
 .rise.in{opacity:1;transform:none;transition:opacity .5s ease,transform .5s cubic-bezier(.2,.7,.3,1)}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rise{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+  .rise{opacity:1;transform:none}
+  @view-transition{navigation:none}
+}
