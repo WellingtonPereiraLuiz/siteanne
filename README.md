@@ -13,6 +13,12 @@ Um website moderno e responsivo para centralizar os links e serviços da ilustra
 
 O design segue o estilo visual único de Anne: **sticker-like aesthetic** com bordas grossas, elementos rotacionados, tipografia desenhada à mão, e paleta de cores em tons de salmon, laranja e rosa.
 
+⚠️ **NOTA IMPORTANTE SOBRE IMAGENS:**
+- Os arquivos HTML finais (`index.html` e `orcamento.html`) **já contêm todas as imagens embutidas como base64 data URIs**
+- Isso significa que são arquivos **self-contained** e funcionam sem depender de arquivos externos
+- A pasta `assets/` existe apenas para uso do script `build.py` durante desenvolvimento
+- Quando você faz deploy na Vercel, os arquivos HTML já estão prontos para funcionar
+
 ---
 
 ## 🛠️ O Que Fizemos
@@ -45,11 +51,72 @@ O design segue o estilo visual único de Anne: **sticker-like aesthetic** com bo
 - Regeneramos arquivos com URLs corretas da Vercel
 - Implementamos tema claro/escuro com CSS tokens
 - Otimizamos imagens como base64 data URIs
+- Implementamos media queries e viewport meta tag para mobile
+- Aumentamos touch targets (botões maiores)
 - Testamos responsividade em diferentes tamanhos
 
 ---
 
-## 💬 Como Usei Claude
+## 🖼️ Como Funcionam as Imagens
+
+### Estrutura de Imagens
+
+**Localização das imagens:** `assets/` (25 arquivos em WebP)
+
+```
+assets/
+├── avatar.webp           → Avatar do perfil de Anne
+├── ex_cartoon.webp       → Exemplo estilo Cartoon (individual)
+├── ex_chibi.webp         → Exemplo estilo Chibi (individual)
+├── ex_cartoon_duo.webp   → Exemplo Cartoon (dupla)
+├── ex_chibi_duo.webp     → Exemplo Chibi (dupla)
+├── ex_cenario.webp       → Exemplo Cenário/Landscape
+├── girls4.webp, tv.webp, dragon.webp, cats.webp, port2.webp, forest.webp, duo.webp, swords.webp, outfits.webp, port1.webp
+│                         → 10 imagens da galeria de trabalhos
+├── tab_chibi_extras.webp → Tabela de preços Chibi extras
+├── tab_combos.webp       → Tabela de combos
+├── tab_responde.webp     → Tabela "Responde" (perguntas frequentes)
+└── tab_obs.webp          → Tabela de observações
+```
+
+### Como as Imagens São Usadas
+
+1. **No Desenvolvimento (Local):**
+   - Você edita as imagens em `assets/` como arquivos .webp normais
+   - Executa: `python build.py "url_orcamento" "url_index"`
+   - O script converte cada imagem para base64 e injeta nos arquivos HTML
+
+2. **No Deploy (Vercel):**
+   - Os arquivos `index.html` e `orcamento.html` **já contêm todas as imagens embutidas**
+   - Vercel não precisa acessar a pasta `assets/`
+   - As imagens carregam instantaneamente (sem requisições HTTP extras)
+
+### Convertendo de WebP para Base64 (O que o build.py faz)
+
+```python
+# build.py lê cada imagem WebP
+def uri(n):
+    return 'data:image/webp;base64,' + base64.b64encode(
+        open(os.path.join(A, n + '.webp'), 'rb').read()
+    ).decode()
+
+# Depois injeta no HTML como:
+<img src="data:image/webp;base64,UklGRiY...muito-texto...">
+```
+
+**Benefícios:**
+- ✅ Arquivos HTML completamente independentes
+- ✅ Sem requisições HTTP (carrega mais rápido)
+- ✅ Pode compartilhar um único arquivo HTML
+- ✅ Funciona offline
+
+**Desvantagens:**
+- ⚠️ Arquivos HTML maiores (por isso ~450 KB cada)
+- ⚠️ Difícil debugar visualmente no navegador
+
+---
+
+## 💬 Como Usei Claude (You Used Me!)
 
 Durante o desenvolvimento, **Claude atuou como**:
 
@@ -81,32 +148,41 @@ Durante o desenvolvimento, **Claude atuou como**:
 
 ```
 siteanne/
-├── README.md                 # Este arquivo (documentação completa)
-├── index.html               # Página de apresentação (0.44 MB)
-├── orcamento.html           # Página de orçamento (0.59 MB)
-├── build.py                 # Script Python para gerar arquivos (opcional, para manutenção)
-└── assets/                  # Pasta com imagens em WebP
-    ├── avatar.webp          # Avatar do perfil de Anne
-    ├── ex_cartoon.webp      # Exemplo estilo Cartoon (individual)
-    ├── ex_chibi.webp        # Exemplo estilo Chibi (individual)
-    ├── ex_cartoon_duo.webp  # Exemplo Cartoon (dupla)
-    ├── ex_chibi_duo.webp    # Exemplo Chibi (dupla)
-    ├── ex_cenario.webp      # Exemplo Cenário/Landscape
-    ├── girls4.webp          # Galeria
-    ├── tv.webp              # Galeria
-    ├── dragon.webp          # Galeria
-    ├── cats.webp            # Galeria
-    ├── port2.webp           # Galeria
-    ├── forest.webp          # Galeria
-    ├── duo.webp             # Galeria
-    ├── swords.webp          # Galeria
-    ├── outfits.webp         # Galeria
-    ├── port1.webp           # Galeria
-    ├── tab_chibi_extras.webp    # Tabela de preços Chibi extras
+├── README.md                     # Este arquivo (documentação completa)
+├── VERCEL_SETUP.md              # Tutorial passo a passo para Vercel
+├── PROXIMOS_PASSOS.md           # Quick checklist de ações
+├── package.json                 # Configuração npm (sem build script)
+├── .gitignore                   # Arquivos ignorados no Git
+│
+├── 📄 index.html                # ARQUIVO DE DEPLOY - Página principal (450 KB)
+│                                # ✓ Contém TODAS as imagens embutidas como base64
+│                                # ✓ Pronto para Vercel - não precisa de assets/
+│
+├── 📄 orcamento.html            # ARQUIVO DE DEPLOY - Página de orçamento (590 KB)
+│                                # ✓ Contém TODAS as imagens embutidas como base64
+│                                # ✓ Pronto para Vercel - não precisa de assets/
+│
+├── build.py                     # Script para DESENVOLVIMENTO (lê assets/ e gera HTML)
+│                                # Execute: python build.py "url_orc" "url_index"
+│                                # Uso: Quando você mudar as imagens em assets/
+│
+└── 📁 assets/                   # Imagens APENAS para desenvolvimento
+    ├── avatar.webp              # Avatar do perfil de Anne
+    ├── ex_cartoon.webp          # Exemplo Cartoon (individual)
+    ├── ex_chibi.webp            # Exemplo Chibi (individual)
+    ├── ex_cartoon_duo.webp      # Exemplo Cartoon (dupla)
+    ├── ex_chibi_duo.webp        # Exemplo Chibi (dupla)
+    ├── ex_cenario.webp          # Exemplo Cenário
+    ├── girls4.webp, tv.webp, dragon.webp, cats.webp, port2.webp
+    ├── forest.webp, duo.webp, swords.webp, outfits.webp, port1.webp
+    │                            # 10 imagens da galeria
+    ├── tab_chibi_extras.webp    # Tabela de preços extras
     ├── tab_combos.webp          # Tabela de combos
-    ├── tab_responde.webp        # Tabela "Responde"
-    └── tab_obs.webp             # Tabela observações
+    ├── tab_responde.webp        # Tabela de perguntas
+    └── tab_obs.webp             # Tabela de observações
 ```
+
+**IMPORTANTE:** Na Vercel, **apenas os arquivos HTML (`index.html` e `orcamento.html`) são necessários**. A pasta `assets/` não precisa estar no servidor, pois as imagens já estão embutidas nos arquivos HTML.
 
 ---
 
@@ -211,20 +287,93 @@ Se preferir não usar Git agora:
 
 ## 🔄 Como Fazer Atualizações Futuras
 
-### Se Conectar via GitHub:
+### Cenário 1: Mudar Texto, Preços ou Cores (Editar Direto no HTML)
+
+Se você quer mudar apenas **texto, preços ou cores** no site:
+
+1. Abra `index.html` ou `orcamento.html` num editor de texto
+2. Procure e edite o conteúdo (exemplo: mudar "R$ 17,00" para "R$ 18,00")
+3. Salve e faça commit:
 ```bash
-# Fazer alterações nos arquivos
-# Depois:
-git add .
-git commit -m "Descrição das mudanças"
+git add index.html orcamento.html
+git commit -m "Atualizar preços"
 git push origin main
-# Vercel faz auto-deploy automaticamente!
+# Vercel faz auto-deploy em segundos!
 ```
 
-### Se Usar build.py (opcional, para reconstruir arquivos):
+### Cenário 2: Mudar as Imagens (Usar build.py)
+
+Se você quer **substituir ou adicionar novas imagens**:
+
+1. **Edite as imagens em `assets/`:**
+   - Substitua os arquivos .webp existentes, ou
+   - Adicione novos arquivos .webp
+
+2. **Rode o build.py local:**
 ```bash
 python build.py "https://anne-ilustradora.vercel.app/orcamento.html" "https://anne-ilustradora.vercel.app/"
 ```
+
+3. **Faça commit e push:**
+```bash
+git add index.html orcamento.html build.py
+git commit -m "Atualizar imagens - novo avatar e galeria"
+git push origin main
+# Vercel faz auto-deploy!
+```
+
+### Cenário 3: Mudar Configurações (Editar build.py)
+
+Se você quer mudar **handles do Instagram, WhatsApp, preços de forma automática**:
+
+1. Abra `build.py` e edite:
+```python
+INSTAGRAM_HANDLE = "anne_ilustradora"
+WHATSAPP_NUMBER = "+5512999999999"  # Adicione se quiser
+
+PRECOS = {
+    'cartoon': {
+        'perfil': 17,  # Mudou de 17 para 20? Altere aqui
+        'cintura': 25,
+        # ... resto dos preços
+    },
+    # ...
+}
+```
+
+2. Rode o build.py:
+```bash
+python build.py "https://anne-ilustradora.vercel.app/orcamento.html" "https://anne-ilustradora.vercel.app/"
+```
+
+3. Commit e push:
+```bash
+git add index.html orcamento.html build.py
+git commit -m "Atualizar configurações e preços"
+git push origin main
+```
+
+**Resumo:** Os arquivos HTML são o que vai para Vercel. O `build.py` é uma ferramenta para **gerar** os arquivos HTML a partir das imagens e configurações.
+
+---
+
+## ⚡ Deploy na Vercel - Ponto Importante
+
+**Os arquivos HTML já estão prontos para Vercel!** Você não precisa de nenhum build process.
+
+### Por que não há build script?
+
+- Os arquivos `index.html` e `orcamento.html` **já contêm todas as imagens embutidas**
+- Não precisam de um servidor para servir arquivos de assets
+- Vercel apenas precisa servir os arquivos HTML estáticos
+
+### O que fazer:
+
+1. Faça push do seu repositório para GitHub
+2. Conecte o repositório na Vercel
+3. Deploy pronto! (sem precisar de nenhuma configuração de build)
+
+**Nota:** O arquivo `package.json` não tem um script `build` propositalmente. Se tiver erro de build na Vercel, é sinal de que algo está diferente. Verifique se os arquivos `index.html` e `orcamento.html` estão presentes no repositório.
 
 ---
 
