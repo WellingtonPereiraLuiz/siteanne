@@ -16,11 +16,17 @@ css/
   base.css          estilos compartilhados pelas duas páginas
   orcamento.css     estilos exclusivos da página de orçamento
 js/
-  dados.js          CONFIG (whatsapp/instagram), PRECOS, NOMES, DESC
-  calculo.js        a lógica da calculadora (cálculo, render, cliques)
+  dados.js          CONFIG (whatsapp/instagram) e DADOS (preços, acabamentos,
+                    descontos de volume, categorias de cenário)
+  calculo.js        a lógica do pedido (cálculo, render, cliques)
   rise.js           animação de entrada dos elementos ao rolar
 assets/             as imagens (.webp), servidas direto — sem base64
 ```
+
+**Regra do `DADOS`:** todo preço, desconto e categoria de cenário mora dentro
+do objeto `DADOS`, em `js/dados.js` — nunca solto no HTML nem escrito direto
+em `calculo.js`. Numa fase futura esse objeto vira um fetch no Supabase, então
+o resto do código já trata ele como "dado de fora", não como constante fixa.
 
 Guia rápido de "onde mexo para...":
 
@@ -31,9 +37,9 @@ Guia rápido de "onde mexo para...":
 | mudar algo só da página de orçamento (chips, barra de total, tabelas) | `css/orcamento.css` |
 | mudar texto ou estrutura da página inicial | `index.html` |
 | mudar texto ou estrutura da página de orçamento | `orcamento.html` |
-| mudar preço, número de WhatsApp ou textos de exemplo da calculadora | `js/dados.js` |
-| mudar como a calculadora soma ou o que ela mostra | `js/calculo.js` |
-| trocar ou adicionar uma imagem | soltar o `.webp` em `assets/` e apontar o `src="assets/nome.webp"` no HTML (ou no `EX` de `dados.js`, se for exemplo da calculadora) |
+| mudar preço, acabamento, desconto, categoria de cenário ou número de WhatsApp | `js/dados.js` (objeto `DADOS` e `CONFIG`) |
+| mudar como o pedido soma ou o que a tela mostra | `js/calculo.js` |
+| trocar ou adicionar uma imagem | soltar o `.webp` em `assets/` e apontar o `src="assets/nome.webp"` no HTML (ou no `EXEMPLOS` de `dados.js`, se for exemplo do preview) |
 
 Cada HTML linka o CSS com `<link>` e o JS com `<script src>` no fim do body.
 Isso evita duplicar CSS entre as páginas e faz o navegador cachear os arquivos —
@@ -79,7 +85,7 @@ para a área de transferência antes de sair, porque a DM não aceita texto pré
 
 - [x] **Fase 0** — abandonar o `build.py`, separar HTML/CSS/JS em pastas e trocar
       o base64 por `assets/*.webp`.
-- [ ] **Fase 1** — calculadora com pedido de vários itens, descontos de acabamento
+- [x] **Fase 1** — calculadora com pedido de vários itens, descontos de acabamento
       e de volume, cenários por faixa de preço
 - [ ] **Fase 2** — página do Fim Anti Herói (webcomic da Anne no Tapas e Webtoon)
 - [ ] **Fase 3** — Supabase: banco, storage, login e painel de administração;

@@ -19,62 +19,110 @@
   <p>Escolha o que você quer e o preço aparece na hora. No fim, é só mandar o resumo pra Anne.</p>
 </div>
 
-<div class="builder sticker">
+<div class="tabs" role="tablist" aria-label="O que você quer pedir">
+  <button class="tab" type="button" id="tab-personagem" role="tab" aria-selected="true" data-modo="personagem">Personagem</button>
+  <button class="tab" type="button" id="tab-cenario" role="tab" aria-selected="false" data-modo="cenario">Cenário</button>
+</div>
+
+<div class="builder sticker" id="config-personagem">
 
   <div class="preview">
     <span class="ph"><img id="pv-img" src="assets/ex_cartoon.webp" width="300" height="562" alt="Exemplo de arte da Anne no estilo escolhido"></span>
     <span class="cap">
       <b id="pv-t">Cartoon &middot; corpo inteiro</b>
       <span id="pv-d">Traço encorpado, cores chapadas e proporção normal.</span>
-      <span class="tag" id="pv-tag">exemplo real da Anne</span>
+      <span class="tag">exemplo real da Anne</span>
     </span>
   </div>
 
   <div class="step">
-    <div class="step-label"><span class="step-num">1.</span> O que você quer?</div>
-    <div class="chips" role="group" aria-label="Tipo de arte">
-      <button class="chip" data-group="tipo" data-value="individual" aria-pressed="true">Um personagem</button>
-      <button class="chip" data-group="tipo" data-value="dupla" aria-pressed="false">Combo dupla</button>
-      <button class="chip" data-group="tipo" data-value="cenario" aria-pressed="false">Cenário / ilustração</button>
+    <div class="step-label"><span class="step-num">1.</span> Estilo</div>
+    <div class="chips" role="group" aria-label="Estilo">
+      <button class="chip" type="button" data-grupo="estilo" data-valor="cartoon" aria-pressed="true">Cartoon</button>
+      <button class="chip" type="button" data-grupo="estilo" data-valor="chibi" aria-pressed="false">Chibi</button>
     </div>
   </div>
 
   <div class="step">
-    <div class="step-label"><span class="step-num">2.</span> Estilo</div>
-    <div class="chips" role="group" aria-label="Estilo">
-      <button class="chip" data-group="estilo" data-value="cartoon" aria-pressed="true">Cartoon</button>
-      <button class="chip" data-group="estilo" data-value="chibi" aria-pressed="false">Chibi</button>
+    <div class="step-label"><span class="step-num">2.</span> Quantos personagens na arte?</div>
+    <div class="chips" role="group" aria-label="Personagens na arte">
+      <button class="chip" type="button" data-grupo="personagens" data-valor="1" aria-pressed="true">1 personagem</button>
+      <button class="chip" type="button" data-grupo="personagens" data-valor="2" aria-pressed="false">2 personagens (dupla)</button>
     </div>
   </div>
 
-  <div class="step" id="step-enq">
+  <div class="step" id="step-enquadramento">
     <div class="step-label"><span class="step-num">3.</span> Enquadramento</div>
     <div class="chips" role="group" aria-label="Enquadramento">
-      <button class="chip" data-group="enq" data-value="perfil" aria-pressed="false">Perfil <span class="pz"></span></button>
-      <button class="chip" data-group="enq" data-value="cintura" aria-pressed="false">Cintura <span class="pz"></span></button>
-      <button class="chip" data-group="enq" data-value="inteiro" aria-pressed="true">Corpo inteiro <span class="pz"></span></button>
-    </div>
-  </div>
-
-  <div class="step" id="step-extras">
-    <div class="step-label"><span class="step-num">4.</span> Personagens extras <span class="step-hint" id="extra-hint"></span></div>
-    <div class="stepper">
-      <button type="button" id="minus" aria-label="Remover um personagem extra">&minus;</button>
-      <output id="extra-count" aria-live="polite">0</output>
-      <button type="button" id="plus" aria-label="Adicionar um personagem extra">+</button>
-      <span class="each" id="extra-each"></span>
+      <button class="chip" type="button" data-grupo="enquadramento" data-valor="perfil" aria-pressed="false">Perfil <span class="pz"></span></button>
+      <button class="chip" type="button" data-grupo="enquadramento" data-valor="cintura" aria-pressed="false">Cintura <span class="pz"></span></button>
+      <button class="chip" type="button" data-grupo="enquadramento" data-valor="inteiro" aria-pressed="true">Corpo inteiro <span class="pz"></span></button>
     </div>
   </div>
 
   <div class="step">
-    <label class="switch">
-      <input type="checkbox" id="comercial">
-      <span>
-        <span class="sw-t">É para uso comercial</span>
-        <span class="sw-d">Capa de livro, adesivo, botton ou qualquer produto que você vai revender. Acrescenta 50% ao valor &mdash; capa de livro tem mínimo de R$&nbsp;120,00.</span>
-      </span>
-    </label>
+    <div class="step-label"><span class="step-num">4.</span> Acabamento</div>
+    <div class="chips" role="group" aria-label="Acabamento" data-chips-acabamento="personagem"></div>
   </div>
+
+  <div class="step">
+    <div class="step-label"><span class="step-num">5.</span> Quantas artes iguais a essa</div>
+    <div class="stepper">
+      <button type="button" data-draft-menos="personagem" aria-label="Diminuir quantidade">&minus;</button>
+      <output id="qtd-personagem" aria-live="polite">1</output>
+      <button type="button" data-draft-mais="personagem" aria-label="Aumentar quantidade">+</button>
+    </div>
+  </div>
+
+  <p class="draft-preco" id="preco-personagem"></p>
+
+  <button class="cta" type="button" id="add-personagem">Adicionar ao pedido</button>
+</div>
+
+<div class="builder sticker" id="config-cenario" hidden>
+
+  <div class="step">
+    <div class="step-label"><span class="step-num">1.</span> Categoria do cenário</div>
+    <div class="cenario-cards" id="cenario-cards"></div>
+  </div>
+
+  <div class="step">
+    <div class="step-label"><span class="step-num">2.</span> Acabamento</div>
+    <div class="chips" role="group" aria-label="Acabamento" data-chips-acabamento="cenario"></div>
+  </div>
+
+  <div class="step">
+    <div class="step-label"><span class="step-num">3.</span> Quantas artes iguais a essa</div>
+    <div class="stepper">
+      <button type="button" data-draft-menos="cenario" aria-label="Diminuir quantidade">&minus;</button>
+      <output id="qtd-cenario" aria-live="polite">1</output>
+      <button type="button" data-draft-mais="cenario" aria-label="Aumentar quantidade">+</button>
+    </div>
+  </div>
+
+  <p class="draft-preco" id="preco-cenario"></p>
+
+  <button class="cta" type="button" id="add-cenario">Adicionar ao pedido</button>
+</div>
+
+<p class="callout" style="margin-top:16px"><b>Cenário é por faixa de preço.</b> As três categorias acima cobrem a maioria dos pedidos — o valor exato depende da complexidade dentro da categoria. Cenário bem específico ou fora delas, a Anne olha a referência e fecha com você na conversa.</p>
+
+<div class="sticker pedido" id="pedido-resumo">
+  <h2 class="eyebrow" style="margin-bottom:12px">seu pedido</h2>
+
+  <p class="vazio" id="pedido-vazio">Ainda não tem nada aqui — monte um personagem ou um cenário ali em cima pra começar. &#9825;</p>
+
+  <div class="lista-itens" id="lista-itens"></div>
+
+  <p class="desconto-aviso" id="desconto-aviso"></p>
+
+  <label class="switch" id="linha-comercial">
+    <input type="checkbox" id="comercial">
+    <span>
+      <span class="sw-t">É para uso comercial</span>
+      <span class="sw-d">Capa de livro, adesivo, botton ou qualquer produto que você vai revender. Acrescenta 50% ao valor &mdash; capa de livro tem mínimo de R$&nbsp;120,00.</span>
+    </span>
+  </label>
 
   <div class="receipt" id="receipt"></div>
 
@@ -83,8 +131,6 @@
     <a class="cta" id="cta-mid" href="#" target="_blank" rel="noopener">Chamar na DM</a>
   </div>
 </div>
-
-<p class="callout" style="margin-top:16px"><b>Cenário conta à parte.</b> Céu, campo e fundos simples já estão inclusos. Rua com casas, quarto detalhado ou sala de aula dão bem mais trabalho &mdash; nesses casos a Anne olha a referência e passa o orçamento na DM.</p>
 
 <svg class="grass" viewBox="0 0 170 26" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22c0-7 2.5-10 4.5-10s4 3 4 9c0-7 2-10 4-10s4.5 3 4.5 11"/><path d="M45 22c0-6 2-8.5 3.5-8.5s3.5 2.5 3.5 7.5c0-6 1.5-8.5 3-8.5s3.5 2.5 3.5 9.5"/><path d="M84 22c0-9 3-12.5 5-12.5s4.5 3.5 4.5 11c0-8.5 2.5-12 4.5-12s5 3.5 5 13.5"/><path d="M126 22c0-6 2-8.5 3.5-8.5s3.5 2.5 3.5 7.5c0-6 1.5-8.5 3-8.5s3.5 2.5 3.5 9.5"/><path d="M156 22c0-7 2-9.5 3.5-9.5s3.5 2.5 3.5 8.5"/></g></svg>
 

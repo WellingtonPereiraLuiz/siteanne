@@ -15,7 +15,6 @@ body{padding-bottom:150px}
 .step:last-child{margin-bottom:0}
 .step-label{font-family:"Gluten","Nunito",system-ui,sans-serif;font-weight:700;font-size:1.02rem;display:flex;align-items:baseline;gap:8px;margin-bottom:10px}
 .step-num{font-family:"Caveat Brush","Nunito",cursive;font-size:1.25rem;color:var(--clay);font-weight:400}
-.step-hint{font-size:.82rem;color:var(--ink-soft);font-weight:400;font-family:"Nunito",sans-serif}
 .chips{display:flex;flex-wrap:wrap;gap:9px}
 .chip{border:2.5px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:8px 15px;cursor:pointer;
   font-weight:700;font-size:.94rem;box-shadow:3px 3px 0 var(--shadow);transition:transform .13s ease,box-shadow .13s ease,background .13s ease}
@@ -40,7 +39,6 @@ body{padding-bottom:150px}
 .stepper button:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--shadow)}
 .stepper button:disabled{opacity:.38;cursor:not-allowed}
 .stepper output{font-family:"Gluten","Nunito",system-ui,sans-serif;font-weight:800;font-size:1.5rem;min-width:2ch;text-align:center;font-variant-numeric:tabular-nums}
-.stepper .each{font-size:.85rem;color:var(--ink-soft);font-variant-numeric:tabular-nums}
 
 .switch{display:flex;align-items:flex-start;gap:12px;cursor:pointer;padding:12px 14px;border:2.5px dashed var(--line);border-radius:14px;background:var(--paper)}
 .switch input{appearance:none;flex:0 0 24px;width:24px;height:24px;margin:2px 0 0;border:2.5px solid var(--line);border-radius:7px;
@@ -49,6 +47,47 @@ body{padding-bottom:150px}
 .switch input:checked::after{content:"";position:absolute;inset:3px 4px 5px 4px;border:0 solid var(--on-clay);border-width:0 0 3px 3px;transform:rotate(-45deg)}
 .switch .sw-t{font-weight:700;font-size:.96rem;line-height:1.3}
 .switch .sw-d{font-size:.83rem;color:var(--ink-soft);line-height:1.4;margin-top:2px}
+
+/* ===== abas personagem / cenário ===== */
+.tabs{display:flex;gap:10px;margin-bottom:18px}
+.tab{flex:1;min-height:44px;border:2.5px solid var(--line);background:var(--paper);color:var(--ink);border-radius:14px;
+  padding:12px 10px;cursor:pointer;font-family:"Gluten","Nunito",system-ui,sans-serif;font-weight:800;font-size:.98rem;
+  box-shadow:3px 3px 0 var(--shadow);transition:transform .13s ease,box-shadow .13s ease,background .13s ease}
+.tab:hover,.tab:focus-visible{transform:translate(1px,1px);box-shadow:2px 2px 0 var(--shadow)}
+.tab[aria-selected="true"]{background:var(--salmon);color:#38222B;transform:translate(3px,3px);box-shadow:0 0 0 var(--shadow)}
+
+/* ===== cartões de categoria de cenário ===== */
+.cenario-cards{display:flex;flex-direction:column;gap:10px}
+.cenario-card{display:block;width:100%;text-align:left;border:2.5px solid var(--line);background:var(--paper);color:var(--ink);
+  border-radius:14px;padding:12px 14px;cursor:pointer;box-shadow:3px 3px 0 var(--shadow);
+  transition:transform .13s ease,box-shadow .13s ease,background .13s ease}
+.cenario-card:hover,.cenario-card:focus-visible{transform:translate(1px,1px);box-shadow:2px 2px 0 var(--shadow)}
+.cenario-card[aria-pressed="true"]{background:var(--salmon);color:#38222B;transform:translate(3px,3px);box-shadow:0 0 0 var(--shadow)}
+.cenario-card .nome{display:block;font-family:"Gluten","Nunito",system-ui,sans-serif;font-weight:800;font-size:1rem}
+.cenario-card .desc{display:block;font-size:.85rem;opacity:.85;margin-top:2px}
+.cenario-card .faixa{display:block;font-size:.85rem;font-weight:700;margin-top:6px;font-variant-numeric:tabular-nums}
+
+/* ===== prévia de preço do rascunho, antes de adicionar ao pedido ===== */
+.draft-preco{margin:14px 0 0;font-size:.92rem;font-weight:700;color:var(--clay);text-align:right;font-variant-numeric:tabular-nums}
+
+/* ===== lista do pedido ===== */
+.pedido{padding:20px 18px 22px;margin-top:22px}
+.vazio{font-family:"Caveat Brush","Nunito",cursive;font-size:1.1rem;color:var(--ink-soft);text-align:center;padding:10px 0}
+.lista-itens{display:flex;flex-direction:column;gap:12px}
+.item-pedido{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px;border:2.5px dashed var(--line);border-radius:14px;background:var(--paper)}
+.item-pedido .info{flex:1;min-width:160px}
+.item-pedido .desc{display:block;font-weight:700;font-size:.94rem}
+.item-pedido .valor{display:block;font-size:.86rem;color:var(--ink-soft);margin-top:2px;font-variant-numeric:tabular-nums}
+.item-pedido .acoes{display:flex;align-items:center;gap:8px}
+.item-remover{flex:0 0 auto;width:44px;height:44px;border-radius:12px;border:2.5px solid var(--line);background:var(--card);cursor:pointer;
+  font-size:1.2rem;line-height:1;color:var(--clay);box-shadow:3px 3px 0 var(--shadow);transition:transform .13s ease,box-shadow .13s ease}
+.item-remover:hover,.item-remover:focus-visible{transform:translate(1px,1px);box-shadow:2px 2px 0 var(--shadow)}
+.item-remover:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--shadow)}
+
+.desconto-aviso{margin:16px 0;padding:10px 14px;background:var(--peach);border:2.5px solid var(--line);border-radius:14px;
+  font-size:.88rem;font-weight:700;text-align:center;box-shadow:3px 3px 0 var(--shadow)}
+
+.cta[aria-disabled="true"]{opacity:.45;pointer-events:none}
 
 .receipt{margin-top:20px;border-top:2.5px dashed var(--line);padding-top:14px;display:flex;flex-direction:column;gap:6px;font-size:.93rem}
 .receipt .row{display:flex;justify-content:space-between;gap:12px;align-items:baseline}
@@ -95,4 +134,6 @@ details .body strong{color:var(--ink)}
   .bar-in{gap:10px}
   .cta{padding:11px 13px;font-size:.92rem}
   .preview .ph{flex:0 0 96px;height:112px}
+  .item-pedido{justify-content:space-between}
+  .item-pedido .acoes{width:100%;justify-content:space-between}
 }
