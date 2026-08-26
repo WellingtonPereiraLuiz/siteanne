@@ -1,0 +1,31 @@
+/* ===== TOKENS: papel salmão, laranja terroso, rosa empoeirado ===== */
+:root{
+  --ink:#38222B; --ink-soft:#6E4E57;
+  --paper:#FBEDE5; --card:#FFF8F3;
+  --salmon:#ED9A6E; --rose:#E5A0A2; --peach:#F8D6C2;
+  --orange:#D9855A; --clay:#A85331; --plum:#8A6382; --mint:#C3D2B3;
+  --line:#38222B; --shadow:#38222B; --ring:#A85331; --on-clay:#FFF8F3;
+  --wash-a:rgba(237,154,110,.38); --wash-b:rgba(248,214,194,.55); --wash-c:rgba(229,160,162,.30);
+  --wash-d:rgba(217,133,90,.20); --wash-e:rgba(195,210,179,.24);
+  --r:18px; --maxw:600px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#F9E8E0; --ink-soft:#CFA99C;
+    --paper:#241720; --card:#37242C;
+    --salmon:#C9806C; --rose:#B87E80; --peach:#5C3942;
+    --orange:#D9855A; --clay:#F0A578; --plum:#BC93B1; --mint:#7E9070;
+    --line:#140B10; --shadow:#140B10; --ring:#F0A578; --on-clay:#2A1119;
+    --wash-a:rgba(237,154,110,.11); --wash-b:rgba(200,128,108,.10); --wash-c:rgba(155,100,130,.13);
+    --wash-d:rgba(217,133,90,.08); --wash-e:rgba(126,144,112,.09);
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#F9E8E0; --ink-soft:#CFA99C;
+  --paper:#241720; --card:#37242C;
+  --salmon:#C9806C; --rose:#B87E80; --peach:#5C3942;
+  --orange:#D9855A; --clay:#F0A578; --plum:#BC93B1; --mint:#7E9070;
+  --line:#140B10; --shadow:#140B10; --ring:#F0A578; --on-clay:#2A1119;
+  --wash-a:rgba(237,154,110,.11); --wash-b:rgba(200,128,108,.10); --wash-c:rgba(155,100,130,.13);
+  --wash-d:rgba(217,133,90,.08); --wash-e:rgba(126,144,112,.09);
+}

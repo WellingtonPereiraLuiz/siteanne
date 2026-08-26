@@ -13,11 +13,10 @@ Um website moderno e responsivo para centralizar os links e serviços da ilustra
 
 O design segue o estilo visual único de Anne: **sticker-like aesthetic** com bordas grossas, elementos rotacionados, tipografia desenhada à mão, e paleta de cores em tons de salmon, laranja e rosa.
 
-⚠️ **NOTA IMPORTANTE SOBRE IMAGENS:**
-- Os arquivos HTML finais (`index.html` e `orcamento.html`) **já contêm todas as imagens embutidas como base64 data URIs**
-- Isso significa que são arquivos **self-contained** e funcionam sem depender de arquivos externos
-- A pasta `assets/` existe apenas para uso do script `build.py` durante desenvolvimento
-- Quando você faz deploy na Vercel, os arquivos HTML já estão prontos para funcionar
+⚠️ **NOTA SOBRE IMAGENS:**
+- As imagens ficam em `assets/*.webp` e os HTML apontam pra elas direto, com `<img src="assets/nome.webp">`
+- Não existe mais conversão para base64 nem passo de build — o navegador busca cada `.webp` como um arquivo normal
+- A pasta `assets/` **precisa** estar no ar junto com os HTML (inclusive na Vercel)
 
 ---
 
@@ -81,38 +80,14 @@ assets/
 
 ### Como as Imagens São Usadas
 
-1. **No Desenvolvimento (Local):**
-   - Você edita as imagens em `assets/` como arquivos .webp normais
-   - Executa: `python build.py "url_orcamento" "url_index"`
-   - O script converte cada imagem para base64 e injeta nos arquivos HTML
-
-2. **No Deploy (Vercel):**
-   - Os arquivos `index.html` e `orcamento.html` **já contêm todas as imagens embutidas**
-   - Vercel não precisa acessar a pasta `assets/`
-   - As imagens carregam instantaneamente (sem requisições HTTP extras)
-
-### Convertendo de WebP para Base64 (O que o build.py faz)
-
-```python
-# build.py lê cada imagem WebP
-def uri(n):
-    return 'data:image/webp;base64,' + base64.b64encode(
-        open(os.path.join(A, n + '.webp'), 'rb').read()
-    ).decode()
-
-# Depois injeta no HTML como:
-<img src="data:image/webp;base64,UklGRiY...muito-texto...">
-```
-
-**Benefícios:**
-- ✅ Arquivos HTML completamente independentes
-- ✅ Sem requisições HTTP (carrega mais rápido)
-- ✅ Pode compartilhar um único arquivo HTML
-- ✅ Funciona offline
-
-**Desvantagens:**
-- ⚠️ Arquivos HTML maiores (por isso ~450 KB cada)
-- ⚠️ Difícil debugar visualmente no navegador
+- Cada `<img>` no HTML aponta direto pro arquivo: `<img src="assets/avatar.webp">`
+- Na calculadora, os exemplos de estilo (`js/dados.js`, objeto `EX`) também apontam pra `assets/*.webp`
+- O navegador pede cada imagem como uma requisição HTTP normal, e guarda em cache —
+  então quem já visitou uma página carrega as imagens repetidas quase na hora
+- Imagens fora da primeira tela (galeria, tabelas de preço) têm `loading="lazy"`:
+  só carregam quando a pessoa rola até elas
+- Na Vercel, a pasta `assets/` precisa estar no repositório — ela é servida como
+  arquivo estático, junto com os HTML
 
 ---
 
@@ -148,50 +123,54 @@ Durante o desenvolvimento, **Claude atuou como**:
 
 ```
 siteanne/
-├── README.md                     # Este arquivo (documentação completa)
-├── VERCEL_SETUP.md              # Tutorial passo a passo para Vercel
-├── PROXIMOS_PASSOS.md           # Quick checklist de ações
-├── package.json                 # Configuração npm (sem build script)
-├── .gitignore                   # Arquivos ignorados no Git
+├── README.md              # este arquivo
+├── CLAUDE.md              # guia rápido do projeto pra IA/dev
+├── package.json           # metadados do projeto (sem script de build)
+├── vercel.json            # desliga o build automático da Vercel
 │
-├── 📄 index.html                # ARQUIVO DE DEPLOY - Página principal (450 KB)
-│                                # ✓ Contém TODAS as imagens embutidas como base64
-│                                # ✓ Pronto para Vercel - não precisa de assets/
+├── index.html             # página inicial (central de links)
+├── orcamento.html         # calculadora de encomendas
 │
-├── 📄 orcamento.html            # ARQUIVO DE DEPLOY - Página de orçamento (590 KB)
-│                                # ✓ Contém TODAS as imagens embutidas como base64
-│                                # ✓ Pronto para Vercel - não precisa de assets/
+├── css/
+│   ├── tokens.css         # variáveis de cor — tema claro e escuro
+│   ├── base.css           # estilos compartilhados pelas duas páginas
+│   └── orcamento.css      # estilos exclusivos da página de orçamento
 │
-├── build.py                     # Script para DESENVOLVIMENTO (lê assets/ e gera HTML)
-│                                # Execute: python build.py "url_orc" "url_index"
-│                                # Uso: Quando você mudar as imagens em assets/
+├── js/
+│   ├── dados.js           # CONFIG (whatsapp/instagram), PRECOS, NOMES, DESC
+│   ├── calculo.js         # lógica da calculadora (cálculo, render, cliques)
+│   └── rise.js            # animação de entrada dos elementos ao rolar
 │
-└── 📁 assets/                   # Imagens APENAS para desenvolvimento
-    ├── avatar.webp              # Avatar do perfil de Anne
-    ├── ex_cartoon.webp          # Exemplo Cartoon (individual)
-    ├── ex_chibi.webp            # Exemplo Chibi (individual)
-    ├── ex_cartoon_duo.webp      # Exemplo Cartoon (dupla)
-    ├── ex_chibi_duo.webp        # Exemplo Chibi (dupla)
-    ├── ex_cenario.webp          # Exemplo Cenário
-    ├── girls4.webp, tv.webp, dragon.webp, cats.webp, port2.webp
-    ├── forest.webp, duo.webp, swords.webp, outfits.webp, port1.webp
+└── assets/                # as 20 imagens do site, em .webp
+    ├── avatar.webp              # avatar do perfil de Anne
+    ├── ex_cartoon.webp          # exemplo Cartoon (individual)
+    ├── ex_chibi.webp            # exemplo Chibi (individual)
+    ├── ex_cartoon_duo.webp      # exemplo Cartoon (dupla)
+    ├── ex_chibi_duo.webp        # exemplo Chibi (dupla)
+    ├── ex_cenario.webp          # exemplo Cenário/paisagem
+    ├── girls4.webp, tv.webp, dragon.webp, cats.webp, port2.webp,
+    │   forest.webp, duo.webp, swords.webp, outfits.webp, port1.webp
     │                            # 10 imagens da galeria
-    ├── tab_chibi_extras.webp    # Tabela de preços extras
-    ├── tab_combos.webp          # Tabela de combos
-    ├── tab_responde.webp        # Tabela de perguntas
-    └── tab_obs.webp             # Tabela de observações
+    ├── tab_chibi_extras.webp    # tabela de preços de extras
+    ├── tab_combos.webp          # tabela de combos
+    ├── tab_responde.webp        # tabela "Anne Responde"
+    └── tab_obs.webp             # tabela de observações
 ```
 
-**IMPORTANTE:** Na Vercel, **apenas os arquivos HTML (`index.html` e `orcamento.html`) são necessários**. A pasta `assets/` não precisa estar no servidor, pois as imagens já estão embutidas nos arquivos HTML.
+**Importante:** na Vercel, `index.html`, `orcamento.html`, `css/`, `js/` e `assets/`
+precisam **todos** estar no repositório — são arquivos estáticos servidos direto,
+sem nenhum passo de build.
 
 ---
 
 ## 🎯 Decisões Técnicas & de Design
 
-### 1. **Abordagem Self-Contained (HTML puro)**
-- **Por quê?** As imagens são convertidas para base64 data URIs, deixando cada arquivo HTML completamente independente
-- **Benefício**: Pode ser compartilhado como arquivo único, sem depender de servidor ou assets externos
-- **Trade-off**: Arquivos maiores (456 KB e 619 KB), mas carregam sem requisições HTTP adicionais
+### 1. **Arquivos Estáticos Normais (pastas `css/`, `js/`, `assets/`)**
+- **Por quê?** Até a Fase 0, as imagens iam embutidas como base64 dentro do HTML, gerado por um `build.py`.
+  Isso inflava os HTML pra 456 KB e 619 KB (94-96% base64) e exigia rodar um script pra qualquer mudança de imagem
+- **Decisão atual**: HTML, CSS, JS e imagens em arquivos próprios, linkados normalmente
+- **Benefício**: HTML final com poucos KB, CSS compartilhado em cache entre as páginas, imagens carregando sob
+  demanda (`loading="lazy"`), e dá pra editar qualquer arquivo direto — sem gerar nada
 
 ### 2. **Dois Arquivos HTML Separados**
 - **Por quê?** Fácil deploy na Vercel, simples compartilhamento de links, carregamento rápido
@@ -301,59 +280,43 @@ git push origin main
 # Vercel faz auto-deploy em segundos!
 ```
 
-### Cenário 2: Mudar as Imagens (Usar build.py)
+### Cenário 2: Mudar ou Adicionar Imagens
 
-Se você quer **substituir ou adicionar novas imagens**:
-
-1. **Edite as imagens em `assets/`:**
-   - Substitua os arquivos .webp existentes, ou
-   - Adicione novos arquivos .webp
-
-2. **Rode o build.py local:**
+1. Salve o novo arquivo `.webp` dentro de `assets/` (ou substitua um existente, mantendo o mesmo nome)
+2. Aponte pra ele no HTML: `<img src="assets/nome-do-arquivo.webp">` — se for um exemplo da
+   calculadora, atualize também o objeto `EX` em `js/dados.js`
+3. Commit e push:
 ```bash
-python build.py "https://anne-ilustradora.vercel.app/orcamento.html" "https://anne-ilustradora.vercel.app/"
-```
-
-3. **Faça commit e push:**
-```bash
-git add index.html orcamento.html build.py
-git commit -m "Atualizar imagens - novo avatar e galeria"
+git add assets/ index.html orcamento.html js/dados.js
+git commit -m "Atualizar imagens"
 git push origin main
 # Vercel faz auto-deploy!
 ```
 
-### Cenário 3: Mudar Configurações (Editar build.py)
+### Cenário 3: Mudar Preços, WhatsApp ou Instagram
 
-Se você quer mudar **handles do Instagram, WhatsApp, preços de forma automática**:
+1. Abra `js/dados.js` e edite:
+```js
+var CONFIG = {
+  instagram: "anne_ilustradora",
+  whatsapp: ""   // "5512999999999" se quiser usar WhatsApp em vez da DM
+};
 
-1. Abra `build.py` e edite:
-```python
-INSTAGRAM_HANDLE = "anne_ilustradora"
-WHATSAPP_NUMBER = "+5512999999999"  # Adicione se quiser
-
-PRECOS = {
-    'cartoon': {
-        'perfil': 17,  # Mudou de 17 para 20? Altere aqui
-        'cintura': 25,
-        # ... resto dos preços
-    },
-    # ...
-}
+var PRECOS = {
+  cartoon:{ perfil:17, cintura:25, inteiro:30, /* ... */ },
+  chibi:  { perfil:15, cintura:20, inteiro:25, /* ... */ }
+};
 ```
 
-2. Rode o build.py:
+2. Commit e push:
 ```bash
-python build.py "https://anne-ilustradora.vercel.app/orcamento.html" "https://anne-ilustradora.vercel.app/"
-```
-
-3. Commit e push:
-```bash
-git add index.html orcamento.html build.py
-git commit -m "Atualizar configurações e preços"
+git add js/dados.js
+git commit -m "Atualizar preços e configurações"
 git push origin main
 ```
 
-**Resumo:** Os arquivos HTML são o que vai para Vercel. O `build.py` é uma ferramenta para **gerar** os arquivos HTML a partir das imagens e configurações.
+**Resumo:** não existe mais passo de build — o que está no repositório é exatamente
+o que vai para a Vercel.
 
 ---
 
@@ -363,9 +326,9 @@ git push origin main
 
 ### Por que não há build script?
 
-- Os arquivos `index.html` e `orcamento.html` **já contêm todas as imagens embutidas**
-- Não precisam de um servidor para servir arquivos de assets
-- Vercel apenas precisa servir os arquivos HTML estáticos
+- `index.html`, `orcamento.html`, `css/`, `js/` e `assets/` já são os arquivos finais
+- Não existe nenhuma etapa de conversão ou geração — o que está no repositório é o que roda no navegador
+- Vercel apenas precisa servir esses arquivos estáticos
 
 ### O que fazer:
 
@@ -379,25 +342,18 @@ git push origin main
 
 ## 📞 Configurações do Projeto
 
-Editar no `build.py` (se usar reconstrução):
+Editar em `js/dados.js`:
 
-```python
-# Alterar esses valores conforme necessário:
-INSTAGRAM_HANDLE = "anne_ilustradora"
-WHATSAPP_NUMBER = None  # +55XXXXXXXXXXX se tiver
+```js
+var CONFIG = {
+  instagram: "anne_ilustradora",
+  whatsapp: ""   // "5512999999999" se tiver — vazio usa a DM do Instagram
+};
 
-PRECOS = {
-    'cartoon': {
-        'perfil': 17, 'cintura': 25, 'inteiro': 30,
-        'dupla': 45, 'cenario': 60,
-        'extras': [20, 25, 30, 35]
-    },
-    'chibi': {
-        'perfil': 15, 'cintura': 20, 'inteiro': 25,
-        'dupla': 35, 'cenario': 50,
-        'extras': [15, 20, 25, 30]
-    }
-}
+var PRECOS = {
+  cartoon:{ perfil:17, cintura:25, inteiro:30, extra:{cintura:20, inteiro:25}, dupla:45, duplaDe:50 },
+  chibi:  { perfil:15, cintura:20, inteiro:25, extra:{cintura:15, inteiro:20}, dupla:35, duplaDe:40 }
+};
 ```
 
 ---
@@ -409,7 +365,6 @@ PRECOS = {
 | **HTML5** | Estrutura semântica |
 | **CSS3** | Estilos, tema claro/escuro, responsividade |
 | **Vanilla JavaScript** | Lógica de cálculo, interatividade |
-| **Python** (build.py) | Automação de build (imagens → base64) |
 | **Vercel** | Hosting & deploy |
 | **GitHub** | Versionamento de código |
 | **Google Fonts** | Tipografia (Caveat Brush, Gluten, Nunito) |
