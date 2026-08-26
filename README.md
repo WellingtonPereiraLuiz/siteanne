@@ -1,6 +1,6 @@
 # 🎨 Site Anne - Portfolio & Orçamento Interativo
 
-Um website moderno e responsivo para centralizar os links e serviços da ilustradora Anne (@anne_ilustradora). O projeto é composto por uma página de apresentação e um construtor de orçamentos interativo onde clientes podem configurar suas encomendas em tempo real.
+Um website moderno e responsivo para centralizar os links e serviços da ilustradora Anne (@anne_ilustradora). O projeto tem três páginas: uma página de apresentação, um construtor de orçamentos interativo onde clientes podem configurar suas encomendas em tempo real, e uma página dedicada à webcomic Fim Anti-Herói.
 
 ---
 
@@ -9,7 +9,8 @@ Um website moderno e responsivo para centralizar os links e serviços da ilustra
 **Site Anne** é uma solução completa para gerenciar o portfólio e serviços de uma ilustradora. O projeto oferece:
 
 - **Página de Apresentação (`index.html`)**: Hero section com avatar, links para redes sociais e plataformas, galeria de trabalhos, e call-to-action para montar orçamento
-- **Página de Orçamento (`orcamento.html`)**: Construtor interativo onde clientes selecionam tipo de trabalho, estilo, enquadramento e extras, com cálculo de preço em tempo real
+- **Página de Orçamento (`orcamento.html`)**: Construtor de pedido com vários itens — personagem (estilo, enquadramento, acabamento) ou cenário (por faixa de preço) — com desconto por volume e cálculo em tempo real
+- **Página do Fim Anti-Herói (`fimantiheroi.html`)**: Capa, botões para ler no Tapas/Webtoon, sinopse, accordion de personagens com comparativo de design antigo x atual, e bloco de apoio via Apoia.se
 
 O design segue o estilo visual único de Anne: **sticker-like aesthetic** com bordas grossas, elementos rotacionados, tipografia desenhada à mão, e paleta de cores em tons de salmon, laranja e rosa.
 
@@ -60,7 +61,7 @@ O design segue o estilo visual único de Anne: **sticker-like aesthetic** com bo
 
 ### Estrutura de Imagens
 
-**Localização das imagens:** `assets/` (25 arquivos em WebP)
+**Localização das imagens:** `assets/` (20 arquivos em WebP)
 
 ```
 assets/
@@ -81,7 +82,7 @@ assets/
 ### Como as Imagens São Usadas
 
 - Cada `<img>` no HTML aponta direto pro arquivo: `<img src="assets/avatar.webp">`
-- Na calculadora, os exemplos de estilo (`js/dados.js`, objeto `EX`) também apontam pra `assets/*.webp`
+- Na calculadora, os exemplos de estilo (`js/dados.js`, objeto `EXEMPLOS`) também apontam pra `assets/*.webp`
 - O navegador pede cada imagem como uma requisição HTTP normal, e guarda em cache —
   então quem já visitou uma página carrega as imagens repetidas quase na hora
 - Imagens fora da primeira tela (galeria, tabelas de preço) têm `loading="lazy"`:
@@ -130,15 +131,19 @@ siteanne/
 │
 ├── index.html             # página inicial (central de links)
 ├── orcamento.html         # calculadora de encomendas
+├── fimantiheroi.html      # página da webcomic Fim Anti-Herói
 │
 ├── css/
 │   ├── tokens.css         # variáveis de cor — tema claro e escuro
-│   ├── base.css           # estilos compartilhados pelas duas páginas
-│   └── orcamento.css      # estilos exclusivos da página de orçamento
+│   ├── base.css           # estilos compartilhados pelas três páginas + transição entre elas
+│   ├── orcamento.css      # estilos exclusivos da página de orçamento
+│   └── fim.css            # estilos exclusivos da página do Fim Anti-Herói
 │
 ├── js/
-│   ├── dados.js           # CONFIG (whatsapp/instagram), PRECOS, NOMES, DESC
-│   ├── calculo.js         # lógica da calculadora (cálculo, render, cliques)
+│   ├── dados.js           # CONFIG (whatsapp/instagram) e DADOS (preços, acabamentos, descontos, cenários)
+│   ├── calculo.js         # lógica do pedido (cálculo, render, cliques)
+│   ├── fim.js             # DADOS (obra, links, personagens) e render da página do Fim Anti-Herói
+│   ├── transicao.js       # fallback de fade entre páginas pra navegador sem @view-transition
 │   └── rise.js            # animação de entrada dos elementos ao rolar
 │
 └── assets/                # as 20 imagens do site, em .webp
@@ -157,9 +162,9 @@ siteanne/
     └── tab_obs.webp             # tabela de observações
 ```
 
-**Importante:** na Vercel, `index.html`, `orcamento.html`, `css/`, `js/` e `assets/`
-precisam **todos** estar no repositório — são arquivos estáticos servidos direto,
-sem nenhum passo de build.
+**Importante:** na Vercel, todos os HTML e as pastas `css/`, `js/` e `assets/`
+precisam estar no repositório — são arquivos estáticos servidos direto, sem
+nenhum passo de build.
 
 ---
 
@@ -172,9 +177,11 @@ sem nenhum passo de build.
 - **Benefício**: HTML final com poucos KB, CSS compartilhado em cache entre as páginas, imagens carregando sob
   demanda (`loading="lazy"`), e dá pra editar qualquer arquivo direto — sem gerar nada
 
-### 2. **Dois Arquivos HTML Separados**
+### 2. **Três Arquivos HTML Separados**
 - **Por quê?** Fácil deploy na Vercel, simples compartilhamento de links, carregamento rápido
 - **Alternativa considerada**: Single-page app (SPA) com React, mas seria mais complexo para deploy simples
+- A troca de página entre elas usa `@view-transition` (nativo, sem JS, em navegadores que suportam) com um
+  fallback simples em `js/transicao.js` pros demais — sensação de app sem virar uma SPA
 
 ### 3. **Paleta de Cores Extraída do Avatar**
 - **Cor Base**: #ED9A6E (salmon do avatar de Anne)
@@ -284,10 +291,11 @@ git push origin main
 
 1. Salve o novo arquivo `.webp` dentro de `assets/` (ou substitua um existente, mantendo o mesmo nome)
 2. Aponte pra ele no HTML: `<img src="assets/nome-do-arquivo.webp">` — se for um exemplo da
-   calculadora, atualize também o objeto `EX` em `js/dados.js`
+   calculadora, atualize o objeto `EXEMPLOS` em `js/dados.js`; se for arte de personagem do
+   Fim Anti-Herói, atualize o campo `img`/`imgAntiga` em `js/fim.js`
 3. Commit e push:
 ```bash
-git add assets/ index.html orcamento.html js/dados.js
+git add assets/ index.html orcamento.html fimantiheroi.html js/dados.js js/fim.js
 git commit -m "Atualizar imagens"
 git push origin main
 # Vercel faz auto-deploy!
@@ -302,9 +310,12 @@ var CONFIG = {
   whatsapp: ""   // "5512999999999" se quiser usar WhatsApp em vez da DM
 };
 
-var PRECOS = {
-  cartoon:{ perfil:17, cintura:25, inteiro:30, /* ... */ },
-  chibi:  { perfil:15, cintura:20, inteiro:25, /* ... */ }
+var DADOS = {
+  precos: {
+    cartoon: { perfil:17, cintura:25, inteiro:30, dupla:45 },
+    chibi:   { perfil:15, cintura:20, inteiro:25, dupla:35 }
+  },
+  /* acabamentos, descontosVolume, cenarios e comercial também moram aqui */
 };
 ```
 
@@ -312,6 +323,17 @@ var PRECOS = {
 ```bash
 git add js/dados.js
 git commit -m "Atualizar preços e configurações"
+git push origin main
+```
+
+### Cenário 4: Mudar Sinopse, Personagem ou Link do Fim Anti-Herói
+
+1. Abra `js/fim.js` e edite o objeto `DADOS` (`obra.sinopse`, `obra.gancho`, `links.tapas`,
+   `links.webtoon`, `links.apoiase`, ou qualquer item de `personagens`)
+2. Commit e push:
+```bash
+git add js/fim.js
+git commit -m "Atualizar conteúdo do Fim Anti-Herói"
 git push origin main
 ```
 
@@ -336,13 +358,13 @@ o que vai para a Vercel.
 2. Conecte o repositório na Vercel
 3. Deploy pronto! (sem precisar de nenhuma configuração de build)
 
-**Nota:** O arquivo `package.json` não tem um script `build` propositalmente. Se tiver erro de build na Vercel, é sinal de que algo está diferente. Verifique se os arquivos `index.html` e `orcamento.html` estão presentes no repositório.
+**Nota:** O arquivo `package.json` não tem um script `build` propositalmente. Se tiver erro de build na Vercel, é sinal de que algo está diferente. Verifique se os arquivos `index.html`, `orcamento.html` e `fimantiheroi.html` estão presentes no repositório.
 
 ---
 
 ## 📞 Configurações do Projeto
 
-Editar em `js/dados.js`:
+Preços, acabamentos, descontos e cenários da calculadora — em `js/dados.js`:
 
 ```js
 var CONFIG = {
@@ -350,11 +372,20 @@ var CONFIG = {
   whatsapp: ""   // "5512999999999" se tiver — vazio usa a DM do Instagram
 };
 
-var PRECOS = {
-  cartoon:{ perfil:17, cintura:25, inteiro:30, extra:{cintura:20, inteiro:25}, dupla:45, duplaDe:50 },
-  chibi:  { perfil:15, cintura:20, inteiro:25, extra:{cintura:15, inteiro:20}, dupla:35, duplaDe:40 }
+var DADOS = {
+  precos: {
+    cartoon: { perfil:17, cintura:25, inteiro:30, dupla:45 },
+    chibi:   { perfil:15, cintura:20, inteiro:25, dupla:35 }
+  },
+  acabamentos: [ /* completo, sem_sombra, lineart — com o fator de cada um */ ],
+  descontosVolume: [ /* faixas de desconto por quantidade de artes */ ],
+  cenarios: [ /* categorias de cenário, com faixa de preço min/max */ ],
+  comercial: { pct:50, minimoCapaLivro:120 }
 };
 ```
+
+Sinopse, personagens e links do Fim Anti-Herói — em `js/fim.js` (objeto `DADOS`, formato
+diferente do de `dados.js`: `obra`, `links` e `personagens`).
 
 ---
 

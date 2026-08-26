@@ -11,35 +11,45 @@ O site é HTML, CSS e JS estático, sem build. Edite os arquivos direto.
 ```
 index.html          página inicial (central de links)
 orcamento.html       calculadora de encomendas
+fimantiheroi.html    página da webcomic Fim Anti-Herói
 css/
   tokens.css        variáveis de cor — tema claro e escuro
-  base.css          estilos compartilhados pelas duas páginas
+  base.css          estilos compartilhados pelas três páginas + transição entre elas
   orcamento.css     estilos exclusivos da página de orçamento
+  fim.css           estilos exclusivos da página do Fim Anti-Herói
 js/
   dados.js          CONFIG (whatsapp/instagram) e DADOS (preços, acabamentos,
-                    descontos de volume, categorias de cenário)
+                    descontos de volume, categorias de cenário) — usado por orcamento.html
   calculo.js        a lógica do pedido (cálculo, render, cliques)
+  fim.js            DADOS (obra, links, personagens) e a renderização da página do Fim Anti-Herói
+  transicao.js      fallback de fade entre páginas pra navegador sem @view-transition
   rise.js           animação de entrada dos elementos ao rolar
 assets/             as imagens (.webp), servidas direto — sem base64
 ```
 
-**Regra do `DADOS`:** todo preço, desconto e categoria de cenário mora dentro
-do objeto `DADOS`, em `js/dados.js` — nunca solto no HTML nem escrito direto
-em `calculo.js`. Numa fase futura esse objeto vira um fetch no Supabase, então
-o resto do código já trata ele como "dado de fora", não como constante fixa.
+**Regra do `DADOS`:** todo preço, desconto, categoria de cenário, sinopse,
+personagem e link de obra mora dentro de um objeto `DADOS` — `js/dados.js` pra
+página de orçamento, `js/fim.js` pra página do Fim Anti-Herói — nunca solto no
+HTML nem escrito direto no arquivo de lógica correspondente. Numa fase futura
+esses objetos viram um fetch no Supabase, então o resto do código já trata
+eles como "dado de fora", não como constante fixa.
 
 Guia rápido de "onde mexo para...":
 
 | Eu quero... | Edito |
 |---|---|
 | mudar uma cor do tema | `css/tokens.css` |
-| mudar espaçamento, fonte, layout de algo que aparece nas duas páginas | `css/base.css` |
+| mudar espaçamento, fonte, layout de algo que aparece em mais de uma página | `css/base.css` |
 | mudar algo só da página de orçamento (chips, barra de total, tabelas) | `css/orcamento.css` |
 | mudar texto ou estrutura da página inicial | `index.html` |
 | mudar texto ou estrutura da página de orçamento | `orcamento.html` |
 | mudar preço, acabamento, desconto, categoria de cenário ou número de WhatsApp | `js/dados.js` (objeto `DADOS` e `CONFIG`) |
 | mudar como o pedido soma ou o que a tela mostra | `js/calculo.js` |
-| trocar ou adicionar uma imagem | soltar o `.webp` em `assets/` e apontar o `src="assets/nome.webp"` no HTML (ou no `EXEMPLOS` de `dados.js`, se for exemplo do preview) |
+| mudar sinopse, gancho, personagem ou link (Tapas/Webtoon/Apoia.se) do Fim Anti-Herói | `js/fim.js` (objeto `DADOS`) |
+| mudar estrutura da página do Fim Anti-Herói | `fimantiheroi.html` |
+| mudar estilo só dessa página (accordion, botões, comparativo antes/depois) | `css/fim.css` |
+| trocar ou adicionar uma imagem | soltar o `.webp` em `assets/` e apontar o `src="assets/nome.webp"` no HTML (ou no `EXEMPLOS` de `dados.js`/`img` de `fim.js`, se for exemplo/arte usada no JS) |
+| mudar a duração ou o estilo da transição entre páginas | `css/base.css` (`@view-transition`, `.saindo`, `@starting-style`) e `js/transicao.js` |
 
 Cada HTML linka o CSS com `<link>` e o JS com `<script src>` no fim do body.
 Isso evita duplicar CSS entre as páginas e faz o navegador cachear os arquivos —
@@ -87,6 +97,6 @@ para a área de transferência antes de sair, porque a DM não aceita texto pré
       o base64 por `assets/*.webp`.
 - [x] **Fase 1** — calculadora com pedido de vários itens, descontos de acabamento
       e de volume, cenários por faixa de preço
-- [ ] **Fase 2** — página do Fim Anti Herói (webcomic da Anne no Tapas e Webtoon)
+- [x] **Fase 2** — página do Fim Anti Herói (webcomic da Anne no Tapas e Webtoon)
 - [ ] **Fase 3** — Supabase: banco, storage, login e painel de administração;
       as imagens passam de `assets/` para arquivos no Storage
