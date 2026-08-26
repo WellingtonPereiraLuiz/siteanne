@@ -1,0 +1,70 @@
+/* ===== topo com botão de voltar (mesmo padrão da página de orçamento) ===== */
+.topbar{display:flex;align-items:center;gap:12px;padding:20px 0 4px}
+.back{display:inline-flex;align-items:center;gap:6px;text-decoration:none;font-weight:700;font-size:.9rem;
+  background:var(--card);border:2.5px solid var(--line);border-radius:999px;padding:7px 14px 7px 11px;box-shadow:3px 3px 0 var(--shadow);
+  transition:transform .13s ease,box-shadow .13s ease}
+.back:hover,.back:focus-visible{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--shadow)}
+.topbar .who{margin-left:auto;display:flex;align-items:center;gap:8px;font-family:"Caveat Brush","Nunito",cursive;font-size:1.15rem;color:var(--ink-soft)}
+.topbar .who img{width:38px;height:38px;border-radius:50%;border:2.5px solid var(--line);object-fit:cover}
+
+/* ===== capa / cabeçalho ===== */
+.fim-capa{width:100%;max-width:340px;height:200px;margin:0 auto 18px;border:3px solid var(--line);
+  border-radius:var(--r);overflow:hidden;box-shadow:6px 6px 0 var(--shadow);background:var(--card)}
+.fim-capa img{width:100%;height:100%;object-fit:cover}
+#fim-gancho{margin-top:10px;color:var(--ink-soft);font-size:clamp(0.95rem,4vw,1.05rem);max-width:36ch;margin-inline:auto}
+
+/* ===== botões grandes (Tapas / Webtoon) ===== */
+.fim-ctas{display:flex;gap:12px;margin-top:22px}
+.fim-cta{flex:1;display:flex;align-items:center;justify-content:center;min-height:52px;text-align:center;
+  text-decoration:none;background:var(--peach);color:var(--ink);border:3px solid var(--line);border-radius:16px;
+  padding:14px 12px;font-family:"Gluten","Nunito",system-ui,sans-serif;font-weight:800;font-size:1rem;
+  box-shadow:5px 5px 0 var(--shadow);transition:transform .16s ease,box-shadow .16s ease}
+.fim-cta:nth-child(1){transform:rotate(-.8deg)}
+.fim-cta:nth-child(2){transform:rotate(.8deg)}
+.fim-cta:hover,.fim-cta:focus-visible{transform:rotate(0deg) translate(3px,3px);box-shadow:2px 2px 0 var(--shadow)}
+.fim-cta[aria-disabled="true"]{opacity:.45;pointer-events:none}
+
+/* ===== sinopse ===== */
+#fim-sinopse{color:var(--ink);line-height:1.7;white-space:pre-line}
+
+/* ===== placeholder de imagem que ainda não existe ===== */
+.fim-ph{display:flex;align-items:center;justify-content:center;text-align:center;
+  border:2.5px dashed var(--line);border-radius:12px;background:var(--paper);color:var(--ink-soft);
+  font-size:.8rem;line-height:1.4;padding:10px}
+
+/* ===== accordion de personagens ===== */
+.fim-personagem{border:2.5px solid var(--line);border-radius:14px;background:var(--card);
+  box-shadow:4px 4px 0 var(--shadow);margin-bottom:12px;overflow:hidden}
+.fim-personagem summary{cursor:pointer;padding:13px 16px;font-family:"Gluten","Nunito",system-ui,sans-serif;
+  font-weight:700;font-size:1.05rem;list-style:none;display:flex;align-items:center;gap:10px;min-height:44px}
+.fim-personagem summary::-webkit-details-marker{display:none}
+.fim-personagem summary::before{content:"+";font-size:1.4rem;line-height:1;color:var(--clay);flex:0 0 auto;transition:transform .2s ease}
+.fim-personagem[open] summary::before{transform:rotate(45deg)}
+.fim-personagem-corpo{padding:0 16px 18px}
+.fim-personagem-arte{width:100%;max-width:220px;height:260px;margin:0 auto 14px;border:2.5px solid var(--line);
+  border-radius:12px;overflow:hidden;background:var(--paper)}
+.fim-personagem-arte img{width:100%;height:100%;object-fit:cover}
+.fim-personagem-desc{color:var(--ink-soft);font-size:.94rem;line-height:1.55}
+
+/* ===== bloco "as mudanças" ===== */
+.fim-mudancas{margin-top:18px;padding-top:16px;border-top:2.5px dashed var(--line)}
+.fim-mudancas h3{font-size:1rem;font-family:"Gluten","Nunito",system-ui,sans-serif;margin-bottom:8px}
+.fim-mudancas > p{color:var(--ink-soft);font-size:.9rem;line-height:1.5;margin-bottom:14px}
+.fim-compare{display:flex;gap:12px}
+.fim-compare-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px}
+.fim-compare-label{font-family:"Caveat Brush","Nunito",cursive;font-size:1rem;color:var(--plum)}
+.fim-compare-item .fim-ph,.fim-compare-item img{width:100%;height:150px;object-fit:cover;border-radius:10px}
+.fim-compare-item img{border:2.5px solid var(--line)}
+
+/* ===== bloco de apoio ===== */
+.fim-apoio{padding:20px 18px;margin-top:22px;text-align:center}
+.fim-apoio p{color:var(--ink-soft);font-size:.94rem;line-height:1.55;margin:10px 0 16px}
+.fim-apoio .fim-cta{display:inline-flex;flex:none;padding:12px 22px}
+
+@media (max-width:480px){
+  .fim-capa{height:180px}
+  .fim-ctas{gap:10px}
+  .fim-cta{font-size:.92rem;padding:12px 8px}
+  .fim-compare{gap:8px}
+  .fim-compare-item .fim-ph,.fim-compare-item img{height:120px}
+}
