@@ -1,4 +1,5 @@
 <title>Encomendas da Anne</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat+Brush&family=Gluten:wght@500;700;800&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap">
@@ -47,8 +48,11 @@ body{
   background-attachment:fixed;
   color:var(--ink);
   font-family:"Nunito",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  font-size:16px; line-height:1.6; -webkit-font-smoothing:antialiased;
-  padding:0 18px 40px;
+  font-size:clamp(16px,4.5vw,18px); line-height:1.6; -webkit-font-smoothing:antialiased;
+  padding:0 16px 40px;
+}
+@media (max-width:480px){
+  body{padding:0 14px 40px}
 }
 .wrap{max-width:var(--maxw);margin:0 auto}
 h1,h2,h3{font-family:"Gluten","Nunito",system-ui,sans-serif;font-weight:800;line-height:1.06;margin:0;text-wrap:balance;letter-spacing:-.01em}
@@ -70,43 +74,59 @@ s{opacity:.55;font-weight:600}
 section{margin-top:36px}
 
 /* ===== hero ===== */
-header{padding:42px 0 6px;text-align:center}
-.avatar-wrap{position:relative;width:132px;margin:0 auto 18px}
+header{padding:clamp(32px,6vw,42px) 0 6px;text-align:center}
+@media (max-width:480px){
+  header{padding:28px 0 4px}
+}
+.avatar-wrap{position:relative;width:clamp(100px,28vw,132px);margin:0 auto 16px}
 .avatar{width:132px;height:132px;border-radius:50%;object-fit:cover;object-position:center;border:3px solid var(--line);box-shadow:5px 6px 0 var(--salmon)}
 .badge{position:absolute;right:-30px;top:4px;font-family:"Caveat Brush","Nunito",cursive;font-size:1.05rem;
   background:var(--mint);color:#38222B;border:2.5px solid var(--line);padding:3px 12px 4px;border-radius:14px;
   transform:rotate(7deg);box-shadow:3px 3px 0 var(--shadow);white-space:nowrap}
-h1{font-size:clamp(2.6rem,12vw,3.6rem)}
-.handle{font-family:"Caveat Brush","Nunito",cursive;font-size:1.35rem;color:var(--clay);margin-top:2px}
-.tagline{margin-top:12px;color:var(--ink-soft);font-size:1.02rem;max-width:34ch;margin-inline:auto}
+h1{font-size:clamp(2rem,10vw,3.6rem)}
+.handle{font-family:"Caveat Brush","Nunito",cursive;font-size:clamp(1.1rem,5vw,1.35rem);color:var(--clay);margin-top:2px}
+.tagline{margin-top:12px;color:var(--ink-soft);font-size:clamp(0.95rem,4vw,1.02rem);max-width:34ch;margin-inline:auto}
 
 /* ===== botao grande p/ orcamento ===== */
 .big-cta{
   text-align:left;display:flex;align-items:center;gap:14px;text-decoration:none;margin-top:30px;
   background:var(--peach);border:3px solid var(--line);border-radius:22px;
-  box-shadow:6px 6px 0 var(--shadow);padding:16px 18px;transform:rotate(-.6deg);
+  box-shadow:6px 6px 0 var(--shadow);padding:18px 16px;transform:rotate(-.6deg);
   transition:transform .16s ease,box-shadow .16s ease;
+  min-height:108px;
+}
+@media (max-width:480px){
+  .big-cta{padding:20px 14px;gap:12px;min-height:120px;flex-direction:column;text-align:center}
 }
 .big-cta:hover,.big-cta:focus-visible{transform:rotate(0deg) translate(3px,3px);box-shadow:3px 3px 0 var(--shadow)}
 .big-cta img{width:74px;height:96px;object-fit:cover;object-position:top center;border:2.5px solid var(--line);border-radius:14px;background:var(--card);flex:0 0 auto}
+@media (max-width:480px){
+  .big-cta img{width:64px;height:80px}
+}
 .big-cta .t{flex:1;min-width:0}
-.big-cta .kicker{font-family:"Caveat Brush","Nunito",cursive;font-size:1.15rem;color:var(--clay);line-height:1.1;display:block}
-.big-cta .name{font-family:"Gluten","Nunito",system-ui,sans-serif;font-weight:800;font-size:1.35rem;line-height:1.12;display:block;margin:2px 0 4px}
-.big-cta .sub{display:block;font-size:.87rem;color:var(--ink-soft);line-height:1.35}
+.big-cta .kicker{font-family:"Caveat Brush","Nunito",cursive;font-size:clamp(1rem,4.5vw,1.15rem);color:var(--clay);line-height:1.1;display:block}
+.big-cta .name{font-family:"Gluten","Nunito",system-ui,sans-serif;font-weight:800;font-size:clamp(1.1rem,5vw,1.35rem);line-height:1.12;display:block;margin:2px 0 4px}
+.big-cta .sub{display:block;font-size:clamp(0.8rem,3.5vw,0.87rem);color:var(--ink-soft);line-height:1.35}
 .big-cta .go{font-family:"Gluten","Nunito",system-ui,sans-serif;font-weight:800;font-size:1.6rem;color:var(--clay);flex:0 0 auto}
+@media (max-width:480px){
+  .big-cta .go{font-size:1.4rem;flex:none}
+}
 
 /* ===== links ===== */
 .links{display:flex;flex-direction:column;gap:14px}
-.link{display:flex;align-items:center;gap:14px;padding:14px 16px;text-decoration:none;transition:transform .16s ease,box-shadow .16s ease}
+.link{display:flex;align-items:center;gap:14px;padding:16px;text-decoration:none;transition:transform .16s ease,box-shadow .16s ease;min-height:60px}
+@media (max-width:480px){
+  .link{padding:18px 14px;min-height:68px}
+}
 .link:nth-child(odd){transform:rotate(-.5deg)}
 .link:nth-child(even){transform:rotate(.5deg)}
 .link:hover,.link:focus-visible{transform:rotate(0deg) translate(3px,3px);box-shadow:2px 2px 0 var(--shadow)}
-.link .ico{flex:0 0 44px;height:44px;border-radius:12px;border:2.5px solid var(--line);display:grid;place-items:center;
-  font-family:"Gluten","Nunito",system-ui,sans-serif;font-weight:800;font-size:1.1rem;color:#38222B}
+.link .ico{flex:0 0 48px;height:48px;border-radius:12px;border:2.5px solid var(--line);display:grid;place-items:center;
+  font-family:"Gluten","Nunito",system-ui,sans-serif;font-weight:800;font-size:clamp(1rem,5vw,1.1rem);color:#38222B}
 .link .txt{flex:1;min-width:0;display:block}
-.link .name{display:block;font-family:"Gluten","Nunito",system-ui,sans-serif;font-weight:700;font-size:1.05rem;line-height:1.25}
-.link .desc{display:block;font-size:.85rem;color:var(--ink-soft);line-height:1.35;margin-top:1px}
-.link .arrow{font-size:1.25rem;color:var(--ink-soft);flex:0 0 auto}
+.link .name{display:block;font-family:"Gluten","Nunito",system-ui,sans-serif;font-weight:700;font-size:clamp(1rem,4.5vw,1.05rem);line-height:1.25}
+.link .desc{display:block;font-size:clamp(0.8rem,3.5vw,0.85rem);color:var(--ink-soft);line-height:1.35;margin-top:2px}
+.link .arrow{font-size:clamp(1.1rem,5vw,1.25rem);color:var(--ink-soft);flex:0 0 auto}
 .i-ig{background:linear-gradient(135deg,#F8D2C0,#D9855A)}
 .i-tapas{background:#F3C0B4}
 .i-webtoon{background:#C3D2B3}
@@ -116,11 +136,14 @@ h1{font-size:clamp(2.6rem,12vw,3.6rem)}
 
 /* ===== galeria ===== */
 .gal{columns:2;column-gap:12px}
+@media (max-width:480px){
+  .gal{columns:1;column-gap:0}
+}
 .gal figure{margin:0 0 12px;break-inside:avoid;border:2.5px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:4px 4px 0 var(--shadow);background:var(--card)}
 .gal img{width:100%;height:auto}
 .gal figure:nth-child(3n+1){transform:rotate(-.7deg)}
 .gal figure:nth-child(3n+2){transform:rotate(.6deg)}
-.gal-note{font-family:"Caveat Brush","Nunito",cursive;font-size:1.1rem;color:var(--ink-soft);text-align:center;margin-top:10px}
+.gal-note{font-family:"Caveat Brush","Nunito",cursive;font-size:clamp(1rem,4.5vw,1.1rem);color:var(--ink-soft);text-align:center;margin-top:10px}
 
 /* ===== callout ===== */
 .callout{padding:16px 18px;font-size:.94rem;line-height:1.55;background:var(--peach);border:2.5px solid var(--line);
