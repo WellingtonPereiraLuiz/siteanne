@@ -1,0 +1,18 @@
+{
+  "name": "siteanne",
+  "version": "1.0.0",
+  "description": "Portfolio & interactive order builder for illustrator Anne",
+  "main": "index.html",
+  "scripts": {
+    "start": "open index.html",
+    "build": "python build.py"
+  },
+  "keywords": [
+    "portfolio",
+    "illustrator",
+    "order-builder",
+    "interactive"
+  ],
+  "author": "Wellington & Claude",
+  "license": "MIT"
+}
