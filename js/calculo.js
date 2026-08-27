@@ -443,5 +443,8 @@
     lb.addEventListener("click", function(e){ if (e.target === lb || e.target.id === "lb-img") lb.close(); });
   }
 
-  render();
+  /* espera CONFIG/DADOS chegarem do Supabase (ver js/dados.js) antes do
+     primeiro desenho — os cliques nos chips/cartões chamam render() de
+     novo depois, e a essa altura os dados já estarão prontos */
+  DADOS_PRONTO.then(render).catch(function(erro){ console.error(erro); });
 })();

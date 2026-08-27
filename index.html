@@ -3,14 +3,24 @@
 <title>Anne Ilustradora</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://xzpctuxezuugyjbedzhh.supabase.co">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat+Brush&family=Gluten:wght@500;700;800&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap">
 <link rel="stylesheet" href="css/tokens.css">
 <link rel="stylesheet" href="css/base.css">
+<!-- carregados aqui (com "defer") em vez de no fim da página, pra o navegador
+     já começar a baixar esses arquivos junto com o resto — sem isso, ele só
+     percebe que precisa deles depois de ler a página inteira, e a busca no
+     Supabase (e as imagens que dependem dela) começa mais tarde -->
+<script src="js/transicao.js" defer></script>
+<script src="js/supabase.js" defer></script>
+<script src="js/avatar.js" defer></script>
+<script src="js/index.js" defer></script>
+<script src="js/rise.js" defer></script>
 <div class="wrap">
 
 <header>
   <div class="avatar-wrap">
-    <img class="avatar" src="assets/avatar.webp" width="360" height="360" alt="Foto de perfil da Anne: ilustração de perfil de uma garota de cabelo castanho">
+    <img class="avatar js-avatar" src="assets/avatar.webp" width="360" height="360" fetchpriority="high" alt="Foto de perfil da Anne: ilustração de perfil de uma garota de cabelo castanho">
     <span class="badge">aceito encomendas!</span>
   </div>
   <h1>Anne</h1>
@@ -73,18 +83,7 @@
 
 <section id="galeria">
   <h2 class="eyebrow">galeria</h2>
-  <div class="gal">
-    <figure><img src="assets/girls4.webp" width="560" height="754" alt="Quatro retratos de personagens femininas em cores fortes" loading="lazy"></figure>
-    <figure><img src="assets/tv.webp" width="560" height="669" alt="Personagem sentada sobre televisores antigos em um quarto roxo" loading="lazy"></figure>
-    <figure><img src="assets/dragon.webp" width="560" height="448" alt="Personagem ao lado de um dragão branco em uma paisagem verde" loading="lazy"></figure>
-    <figure><img src="assets/cats.webp" width="560" height="808" alt="Dois personagens em estilo cartoon segurando gatinhos" loading="lazy"></figure>
-    <figure><img src="assets/port2.webp" width="560" height="558" alt="Quatro retratos de personagens de fantasia" loading="lazy"></figure>
-    <figure><img src="assets/forest.webp" width="560" height="441" alt="Personagem de chifres sentada à beira de uma cachoeira" loading="lazy"></figure>
-    <figure><img src="assets/duo.webp" width="560" height="560" alt="Dois personagens de corpo inteiro com roupas detalhadas" loading="lazy"></figure>
-    <figure><img src="assets/swords.webp" width="560" height="546" alt="Cinco espadas do Finn desenhadas lado a lado" loading="lazy"></figure>
-    <figure><img src="assets/outfits.webp" width="560" height="298" alt="Quatro versões de uma mesma personagem com roupas diferentes" loading="lazy"></figure>
-    <figure><img src="assets/port1.webp" width="560" height="558" alt="Quatro retratos de personagens de cabelo escuro" loading="lazy"></figure>
-  </div>
+  <div class="gal" id="galeria-grid"></div>
   <p class="gal-note">e tem muito mais no Instagram &#8599;</p>
 </section>
 
@@ -108,5 +107,3 @@
 </footer>
 
 </div>
-<script src="js/transicao.js"></script>
-<script src="js/rise.js"></script>
