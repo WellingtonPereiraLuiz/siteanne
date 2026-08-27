@@ -15,28 +15,33 @@ Um website moderno e responsivo para centralizar os links e serviços da ilustra
 O design segue o estilo visual único de Anne: **sticker-like aesthetic** com bordas grossas, elementos rotacionados, tipografia desenhada à mão, e paleta de cores em tons de salmon, laranja e rosa.
 
 ⚠️ **NOTA SOBRE IMAGENS:**
-- As imagens ficam em `assets/*.webp` e os HTML apontam pra elas direto, com `<img src="assets/nome.webp">`
-- Não existe mais conversão para base64 nem passo de build — o navegador busca cada `.webp` como um arquivo normal
-- A pasta `assets/` **precisa** estar no ar junto com os HTML (inclusive na Vercel)
+- As imagens moram no **Supabase Storage**, não mais servidas direto da pasta `assets/` (ver a
+  seção "Como Funcionam as Imagens" mais abaixo pra entender a diferença entre as fixas no código
+  e as que vêm do banco)
+- `assets/*.webp` continua no repositório como o arquivo original de cada imagem e como fallback
+  local do avatar (aparece por uma fração de segundo antes do JS trocar pela URL do Storage) — não
+  é mais o que o navegador usa a maior parte do tempo
+- Não existe conversão para base64 nem passo de build — o navegador busca cada imagem como um
+  arquivo normal, só que agora de um domínio diferente (`supabase.co`)
 
 ---
 
 ## 🛠️ O Que Fizemos
 
-### Fase 1: Pesquisa e Design
+### Pesquisa e Design
 - Analisamos o perfil do Instagram e inspirações fornecidas pela Anne
 - Extraímos a paleta de cores do avatar da Anne (#ED9A6E como cor base)
 - Criamos uma identidade visual coerente com tons de salmon, rosa e laranja (não saturados)
 - Desenvolvemos componentes reutilizáveis no estilo "sticker" com bordas e sombras
 
-### Fase 2: Desenvolvimento da Página Principal
+### Desenvolvimento da Página Principal
 - Hero section com avatar circular, nome (@anne_ilustradora) e tagline
 - Seção "Onde me achar" com 6 links para plataformas (Instagram, Tapas, Webtoon, itch.io, ArtStation, Apoia.se)
 - Galeria de 10 trabalhos em layout 2-colunas com rotações suaves
 - Call-to-action buttons para acessar página de orçamento
 - Footer com assinatura
 
-### Fase 3: Desenvolvimento da Página de Orçamento
+### Desenvolvimento da Página de Orçamento
 - **Seletor de Tipo**: Individual, Dupla, Cenário
 - **Seletor de Estilo**: Cartoon vs. Chibi (com exemplos visuais)
 - **Seletor de Enquadramento**: Perfil, Cintura, Inteiro (condicionado ao tipo Individual)
@@ -47,7 +52,7 @@ O design segue o estilo visual único de Anne: **sticker-like aesthetic** com bo
 - **Cálculo em Tempo Real**: Resumo itemizado e total na sticky footer
 - **Integração Social**: Botão "Fechar pedido" que abre WhatsApp ou DM do Instagram
 
-### Fase 4: Otimização e Deploy
+### Otimização e Deploy
 - Regeneramos arquivos com URLs corretas da Vercel
 - Implementamos tema claro/escuro com CSS tokens
 - Otimizamos imagens como base64 data URIs
@@ -55,40 +60,62 @@ O design segue o estilo visual único de Anne: **sticker-like aesthetic** com bo
 - Aumentamos touch targets (botões maiores)
 - Testamos responsividade em diferentes tamanhos
 
+### Banco de Dados e Storage (Supabase)
+- Criamos o projeto no Supabase e as 5 tabelas do site (`configuracao`, `cenarios`, `galeria`,
+  `obra`, `personagens`) com Row Level Security ligado — leitura pública, escrita só pra quem
+  estiver logado (`supabase/schema.sql` + `supabase/policies.sql`)
+- Criamos 4 buckets no Storage: `perfil`, `galeria` e `personagens` (imagens que um painel de
+  admin vai editar) e `estaticos` (exemplos da calculadora e tabelas de preço, que não têm tela de
+  edição ainda)
+- Rodamos `supabase/migrar.mjs` pra subir as 20 imagens de `assets/` pro Storage e popular as 5
+  tabelas com os dados que antes estavam fixos em `js/dados.js`/`js/fim.js`
+- Reescrevemos `js/dados.js` e `js/fim.js` pra buscar tudo isso do banco (`fetch` puro, sem
+  biblioteca nova) em vez de ler de um objeto fixo no arquivo; `js/avatar.js` e `js/index.js` são
+  novos, pro avatar e a galeria também virem do banco/Storage
+- Corrigimos dois problemas de carregamento que apareceram com a mudança: os `<script>` agora usam
+  `defer` e ficam no `<head>` (o navegador começa a baixar tudo mais cedo) e as imagens do Storage
+  passaram a ter `Cache-Control` de verdade (o upload precisa usar `PUT`, não `POST` com upsert)
+
 ---
 
 ## 🖼️ Como Funcionam as Imagens
 
-### Estrutura de Imagens
+As imagens do site vêm do **Supabase Storage**, não da pasta `assets/`. Tem dois grupos, tratados
+de formas diferentes:
 
-**Localização das imagens:** `assets/` (20 arquivos em WebP)
+### Grupo 1 — imagens "de conteúdo" (vêm do banco)
 
-```
-assets/
-├── avatar.webp           → Avatar do perfil de Anne
-├── ex_cartoon.webp       → Exemplo estilo Cartoon (individual)
-├── ex_chibi.webp         → Exemplo estilo Chibi (individual)
-├── ex_cartoon_duo.webp   → Exemplo Cartoon (dupla)
-├── ex_chibi_duo.webp     → Exemplo Chibi (dupla)
-├── ex_cenario.webp       → Exemplo Cenário/Landscape
-├── girls4.webp, tv.webp, dragon.webp, cats.webp, port2.webp, forest.webp, duo.webp, swords.webp, outfits.webp, port1.webp
-│                         → 10 imagens da galeria de trabalhos
-├── tab_chibi_extras.webp → Tabela de preços Chibi extras
-├── tab_combos.webp       → Tabela de combos
-├── tab_responde.webp     → Tabela "Responde" (perguntas frequentes)
-└── tab_obs.webp          → Tabela de observações
-```
+Avatar, as 10 fotos da galeria, a capa e as artes dos personagens do Fim Anti-Herói. A URL de cada
+uma mora numa tabela (`configuracao.perfil.avatar_url`, `galeria.imagem_url`,
+`obra.capa`/`personagens.img_url`), e o JavaScript da página busca essa URL antes de desenhar a
+`<img>` — é por isso que existem `js/avatar.js` (roda nas três páginas) e `js/index.js`
+(só a galeria do `index.html`). Isso é proposital: é o que vai deixar a Anne trocar essas fotos
+pelo futuro painel de admin, sem precisar mexer em código nem esperar deploy.
 
-### Como as Imagens São Usadas
+### Grupo 2 — imagens "fixas" (URL direto no código)
 
-- Cada `<img>` no HTML aponta direto pro arquivo: `<img src="assets/avatar.webp">`
-- Na calculadora, os exemplos de estilo (`js/dados.js`, objeto `EXEMPLOS`) também apontam pra `assets/*.webp`
-- O navegador pede cada imagem como uma requisição HTTP normal, e guarda em cache —
-  então quem já visitou uma página carrega as imagens repetidas quase na hora
-- Imagens fora da primeira tela (galeria, tabelas de preço) têm `loading="lazy"`:
-  só carregam quando a pessoa rola até elas
-- Na Vercel, a pasta `assets/` precisa estar no repositório — ela é servida como
-  arquivo estático, junto com os HTML
+Os exemplos de estilo da calculadora (`ex_cartoon.webp` etc., em `js/dados.js`, objeto `EXEMPLOS`)
+e as 4 tabelas de preço em foto (`tab_*.webp`, direto no `<img>` de `orcamento.html`). Essas ainda
+não têm linha de banco nem tela de edição — ficam no bucket `estaticos` do Storage, com a URL
+escrita direto no código. Pra trocar uma dessas, é o mesmo fluxo de antes: subir o arquivo novo
+pro bucket e atualizar a URL no código (ver "Como Fazer Atualizações Futuras" abaixo).
+
+### De onde as imagens realmente saem
+
+**Fonte original:** `assets/` (20 arquivos `.webp`, continuam no repositório). O script
+`supabase/migrar.mjs` foi o que subiu cada um pro bucket certo do Storage — `perfil` (avatar),
+`galeria` (as 10 fotos de trabalho) ou `estaticos` (exemplos + tabelas) — e gravou a URL pública
+nas tabelas do Grupo 1. Rodar esse script de novo **substitui** todas as imagens e o conteúdo de
+`cenarios`/`galeria`/`personagens` pelos dados originais — não é seguro rodar depois que a Anne
+começar a editar pelo painel.
+
+- O avatar mantém `<img src="assets/avatar.webp">` como valor inicial no HTML, só pra não aparecer
+  quebrado no instante antes do JavaScript rodar — `js/avatar.js` troca pela URL do Storage assim
+  que a busca no banco responde
+- Imagens fora da primeira tela (galeria, tabelas de preço, artes de personagem) têm
+  `loading="lazy"`: só carregam quando a pessoa rola até elas
+- As imagens do Storage têm `Cache-Control: public, max-age=86400` (1 dia) — o navegador reusa a
+  cópia local em vez de pedir de novo ao servidor a cada visita
 
 ---
 
@@ -140,38 +167,38 @@ siteanne/
 │   └── fim.css            # estilos exclusivos da página do Fim Anti-Herói
 │
 ├── js/
-│   ├── dados.js           # CONFIG (whatsapp/instagram) e DADOS (preços, acabamentos, descontos, cenários)
-│   ├── calculo.js         # lógica do pedido (cálculo, render, cliques)
-│   ├── fim.js             # DADOS (obra, links, personagens) e render da página do Fim Anti-Herói
+│   ├── supabase.js        # URL + anon key do Supabase e o helper supaSelect() de fetch na API REST
+│   ├── avatar.js          # busca o avatar e troca o src de toda <img class="js-avatar"> (3 páginas)
+│   ├── dados.js           # CONFIG e DADOS — preenchidos por um fetch no banco (ver DADOS_PRONTO)
+│   ├── calculo.js         # lógica do pedido (cálculo, render, cliques) — espera DADOS_PRONTO
+│   ├── index.js           # busca a tabela "galeria" e monta as fotos do index.html
+│   ├── fim.js             # busca "obra" e "personagens" e renderiza a página do Fim Anti-Herói
 │   ├── transicao.js       # fallback de fade entre páginas pra navegador sem @view-transition
 │   └── rise.js            # animação de entrada dos elementos ao rolar
 │
-└── assets/                # as 20 imagens do site, em .webp
-    ├── avatar.webp              # avatar do perfil de Anne
-    ├── ex_cartoon.webp          # exemplo Cartoon (individual)
-    ├── ex_chibi.webp            # exemplo Chibi (individual)
-    ├── ex_cartoon_duo.webp      # exemplo Cartoon (dupla)
-    ├── ex_chibi_duo.webp        # exemplo Chibi (dupla)
-    ├── ex_cenario.webp          # exemplo Cenário/paisagem
-    ├── girls4.webp, tv.webp, dragon.webp, cats.webp, port2.webp,
-    │   forest.webp, duo.webp, swords.webp, outfits.webp, port1.webp
-    │                            # 10 imagens da galeria
-    ├── tab_chibi_extras.webp    # tabela de preços de extras
-    ├── tab_combos.webp          # tabela de combos
-    ├── tab_responde.webp        # tabela "Anne Responde"
-    └── tab_obs.webp             # tabela de observações
+├── supabase/              # tudo relacionado ao banco/Storage — nada disso é servido
+│   │                        pro navegador, é só pra rodar uma vez no painel do Supabase / terminal
+│   ├── schema.sql         # cria as 5 tabelas com RLS ligado (rodar 1º no SQL Editor)
+│   ├── policies.sql       # políticas de leitura/escrita + cria os buckets perfil/galeria/personagens (2º)
+│   ├── bucket-estaticos.sql  # cria o bucket "estaticos" (exemplos + tabelas de preço)
+│   └── migrar.mjs         # script Node de migração única — sobe assets/*.webp pro Storage e
+│                             popula as tabelas (precisa da service_role key, só roda local)
+│
+└── assets/                # os 20 arquivos .webp originais — fonte pro migrar.mjs, e fallback
+                              local do avatar (ver "Como Funcionam as Imagens")
 ```
 
-**Importante:** na Vercel, todos os HTML e as pastas `css/`, `js/` e `assets/`
-precisam estar no repositório — são arquivos estáticos servidos direto, sem
-nenhum passo de build.
+**Importante:** na Vercel, todos os HTML e as pastas `css/` e `js/` precisam estar no
+repositório — são arquivos estáticos servidos direto, sem nenhum passo de build. A pasta
+`supabase/` também vai no repositório (é código-fonte do projeto), mas não é "servida" — o
+navegador nunca acessa esses arquivos, só o banco/Storage que eles configuraram.
 
 ---
 
 ## 🎯 Decisões Técnicas & de Design
 
 ### 1. **Arquivos Estáticos Normais (pastas `css/`, `js/`, `assets/`)**
-- **Por quê?** Até a Fase 0, as imagens iam embutidas como base64 dentro do HTML, gerado por um `build.py`.
+- **Por quê?** No início do projeto, as imagens iam embutidas como base64 dentro do HTML, gerado por um `build.py`.
   Isso inflava os HTML pra 456 KB e 619 KB (94-96% base64) e exigia rodar um script pra qualquer mudança de imagem
 - **Decisão atual**: HTML, CSS, JS e imagens em arquivos próprios, linkados normalmente
 - **Benefício**: HTML final com poucos KB, CSS compartilhado em cache entre as páginas, imagens carregando sob
@@ -273,72 +300,100 @@ Se preferir não usar Git agora:
 
 ## 🔄 Como Fazer Atualizações Futuras
 
-### Cenário 1: Mudar Texto, Preços ou Cores (Editar Direto no HTML)
+Hoje, **preços, cenários, galeria, avatar, sinopse e personagens não estão mais escritos
+em nenhum arquivo do site** — eles vêm do banco (Supabase). Editar `js/dados.js` ou `js/fim.js`
+não muda mais o que aparece pro público; esses arquivos só têm a *lógica* que busca e desenha os
+dados, não os dados em si. Até o painel de administração da Anne existir, atualizar esse conteúdo
+é feito pelo **SQL Editor do Supabase** (Project → SQL Editor → New query).
 
-Se você quer mudar apenas **texto, preços ou cores** no site:
+### Cenário 1: Mudar Preços, Acabamentos, Descontos ou Cenários da Calculadora
 
-1. Abra `index.html` ou `orcamento.html` num editor de texto
-2. Procure e edite o conteúdo (exemplo: mudar "R$ 17,00" para "R$ 18,00")
-3. Salve e faça commit:
-```bash
-git add index.html orcamento.html
-git commit -m "Atualizar preços"
-git push origin main
-# Vercel faz auto-deploy em segundos!
+Tudo isso mora na tabela `configuracao` (chaves `precos`, `acabamentos`, `descontosVolume`,
+`comercial`) e na tabela `cenarios`. Exemplo, pra mudar o preço de "perfil" do estilo cartoon:
+
+```sql
+update configuracao
+set valor = jsonb_set(valor, '{cartoon,perfil}', '18')
+where chave = 'precos';
 ```
 
-### Cenário 2: Mudar ou Adicionar Imagens
+Pra editar um cenário (ex.: mudar a faixa de preço de "vegetacao"):
 
-1. Salve o novo arquivo `.webp` dentro de `assets/` (ou substitua um existente, mantendo o mesmo nome)
-2. Aponte pra ele no HTML: `<img src="assets/nome-do-arquivo.webp">` — se for um exemplo da
-   calculadora, atualize o objeto `EXEMPLOS` em `js/dados.js`; se for arte de personagem do
-   Fim Anti-Herói, atualize o campo `img`/`imgAntiga` em `js/fim.js`
-3. Commit e push:
-```bash
-git add assets/ index.html orcamento.html fimantiheroi.html js/dados.js js/fim.js
-git commit -m "Atualizar imagens"
-git push origin main
-# Vercel faz auto-deploy!
+```sql
+update cenarios set preco_min = 65, preco_max = 130 where slug = 'vegetacao';
 ```
 
-### Cenário 3: Mudar Preços, WhatsApp ou Instagram
+Não precisa de commit nem push — o site já busca o valor novo na próxima visita (o navegador só
+usa a cópia salva se ainda não passou 1 dia, ver "Como Funcionam as Imagens").
 
-1. Abra `js/dados.js` e edite:
-```js
-var CONFIG = {
-  instagram: "anne_ilustradora",
-  whatsapp: ""   // "5512999999999" se quiser usar WhatsApp em vez da DM
-};
+### Cenário 2: Mudar Instagram ou WhatsApp
 
-var DADOS = {
-  precos: {
-    cartoon: { perfil:17, cintura:25, inteiro:30, dupla:45 },
-    chibi:   { perfil:15, cintura:20, inteiro:25, dupla:35 }
-  },
-  /* acabamentos, descontosVolume, cenarios e comercial também moram aqui */
-};
+Também é a tabela `configuracao`, chave `perfil`:
+
+```sql
+update configuracao
+set valor = jsonb_set(valor, '{whatsapp}', '"5512999999999"')
+where chave = 'perfil';
 ```
 
-2. Commit e push:
-```bash
-git add js/dados.js
-git commit -m "Atualizar preços e configurações"
-git push origin main
+### Cenário 3: Trocar uma Foto da Galeria, o Avatar, ou Adicionar/Remover uma Foto
+
+1. Suba o arquivo `.webp` novo pro bucket certo do Storage (Project → Storage → `galeria` ou
+   `perfil`, botão "Upload file")
+2. Copie a URL pública do arquivo (clique nele → "Get URL")
+3. Atualize a linha correspondente:
+```sql
+-- trocar uma foto existente (mantém a ordem/posição dela)
+update galeria set imagem_url = 'URL_NOVA_AQUI' where id = 3;
+
+-- esconder uma foto sem apagar (some da galeria, mas continua no banco)
+update galeria set visivel = false where id = 3;
+
+-- adicionar uma foto nova
+insert into galeria (imagem_url, titulo, ordem) values ('URL_NOVA_AQUI', 'Descrição da foto', 11);
 ```
 
 ### Cenário 4: Mudar Sinopse, Personagem ou Link do Fim Anti-Herói
 
-1. Abra `js/fim.js` e edite o objeto `DADOS` (`obra.sinopse`, `obra.gancho`, `links.tapas`,
-   `links.webtoon`, `links.apoiase`, ou qualquer item de `personagens`)
-2. Commit e push:
+A tabela `obra` guarda `titulo`, `gancho`, `sinopse`, `apoio_texto`, `capa`, `link_tapas`,
+`link_webtoon` e `link_apoiase` — uma linha por chave:
+
+```sql
+update obra set valor = 'A sinopse de verdade, escrita pela Anne...' where chave = 'sinopse';
+update obra set valor = 'https://tapas.io/series/finn-o-antiheroi' where chave = 'link_tapas';
+```
+
+E a tabela `personagens`:
+
+```sql
+update personagens
+set descricao = 'Descrição de verdade do Finn...', mudancas = 'Como o design mudou...'
+where nome = 'Finn';
+```
+
+### Cenário 5: Mudar Exemplos da Calculadora ou Tabelas de Preço em Foto
+
+Essas duas (`EXEMPLOS` em `js/dados.js`, e as 4 imagens de tabela em `orcamento.html`) **não** vêm
+do banco ainda — continuam sendo código, porque não têm tela de edição prevista por enquanto:
+
+1. Suba o `.webp` novo pro bucket `estaticos` do Storage
+2. Cole a URL pública no lugar certo: `EXEMPLOS` em `js/dados.js`, ou o `src`/`data-full` do
+   `<img>` correspondente em `orcamento.html`
+3. Commit e push:
 ```bash
-git add js/fim.js
-git commit -m "Atualizar conteúdo do Fim Anti-Herói"
+git add js/dados.js orcamento.html
+git commit -m "Atualizar exemplo/tabela de preços"
 git push origin main
 ```
 
-**Resumo:** não existe mais passo de build — o que está no repositório é exatamente
-o que vai para a Vercel.
+### Cenário 6: Mudar HTML, CSS ou a Lógica de Cálculo
+
+Continua sendo código de verdade — edita o arquivo, testa local, commit e push, igual sempre foi.
+Isso vale pra layout, estilo visual, e a lógica de como o pedido é somado (`js/calculo.js`).
+
+**Resumo:** não existe passo de build — o que está no repositório é exatamente o que vai para a
+Vercel — mas agora **conteúdo** (preços, textos, fotos editáveis) e **código** (layout, lógica,
+estilo) são duas coisas separadas, cada uma com seu próprio jeito de atualizar.
 
 ---
 
@@ -364,28 +419,19 @@ o que vai para a Vercel.
 
 ## 📞 Configurações do Projeto
 
-Preços, acabamentos, descontos e cenários da calculadora — em `js/dados.js`:
+Preços, acabamentos, descontos, cenários, avatar, contato (Instagram/WhatsApp), galeria, sinopse e
+personagens do Fim Anti-Herói **não estão mais em nenhum arquivo do site** — moram no banco do
+Supabase. Ver "Como Fazer Atualizações Futuras" acima pros comandos SQL de cada caso.
 
-```js
-var CONFIG = {
-  instagram: "anne_ilustradora",
-  whatsapp: ""   // "5512999999999" se tiver — vazio usa a DM do Instagram
-};
+`js/dados.js` e `js/fim.js` continuam existindo, mas hoje só têm a *lógica* que busca esses dados
+(`CONFIG`/`DADOS` começam vazios e são preenchidos por um `fetch` — ver `DADOS_PRONTO` em
+`js/dados.js`), mais o `EXEMPLOS` da calculadora, que ainda é fixo no código (ver Cenário 5 acima).
 
-var DADOS = {
-  precos: {
-    cartoon: { perfil:17, cintura:25, inteiro:30, dupla:45 },
-    chibi:   { perfil:15, cintura:20, inteiro:25, dupla:35 }
-  },
-  acabamentos: [ /* completo, sem_sombra, lineart — com o fator de cada um */ ],
-  descontosVolume: [ /* faixas de desconto por quantidade de artes */ ],
-  cenarios: [ /* categorias de cenário, com faixa de preço min/max */ ],
-  comercial: { pct:50, minimoCapaLivro:120 }
-};
-```
-
-Sinopse, personagens e links do Fim Anti-Herói — em `js/fim.js` (objeto `DADOS`, formato
-diferente do de `dados.js`: `obra`, `links` e `personagens`).
+**Acesso ao projeto no Supabase:** [supabase.com/dashboard](https://supabase.com/dashboard),
+projeto do site da Anne. A `anon key` (pública, usada pelo site pra ler os dados) está em
+`js/supabase.js` — é segura pra ficar ali. A `service_role key` (acesso total, ignora as regras de
+segurança) **nunca** deve entrar em nenhum arquivo do repositório; só é usada na mão, na hora de
+rodar `supabase/migrar.mjs`.
 
 ---
 
@@ -396,6 +442,7 @@ diferente do de `dados.js`: `obra`, `links` e `personagens`).
 | **HTML5** | Estrutura semântica |
 | **CSS3** | Estilos, tema claro/escuro, responsividade |
 | **Vanilla JavaScript** | Lógica de cálculo, interatividade |
+| **Supabase** | Banco de dados (Postgres), Storage de imagens e (em breve) login/autenticação |
 | **Vercel** | Hosting & deploy |
 | **GitHub** | Versionamento de código |
 | **Google Fonts** | Tipografia (Caveat Brush, Gluten, Nunito) |
@@ -404,6 +451,7 @@ diferente do de `dados.js`: `obra`, `links` e `personagens`).
 
 ## 🚀 Próximas Melhorias (Ideias Futuras)
 
+- [ ] Login da Anne + painel de administração (editar preços, galeria, obra e personagens sem SQL)
 - [ ] Adicionar forma de pagamento integrada (Pix, cartão)
 - [ ] Sistema de agendamento de prazos
 - [ ] Dashboard para Anne acompanhar pedidos
@@ -424,4 +472,4 @@ Dúvidas sobre o projeto?
 
 **Desenvolvido com ❤️ por Wellington (usando Claude como AI partner)**
 
-*Última atualização: 26 de Agosto de 2026*
+*Última atualização: 27 de Agosto de 2026*
