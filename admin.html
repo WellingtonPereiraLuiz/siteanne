@@ -1,0 +1,60 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Painel da Anne</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://xzpctuxezuugyjbedzhh.supabase.co">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat+Brush&family=Gluten:wght@500;700;800&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/orcamento.css">
+<link rel="stylesheet" href="css/admin.css">
+<!-- carregados aqui (defer) — mesmo motivo do resto do site, ver index.html -->
+<script src="js/supabase.js" defer></script>
+<script src="js/auth.js" defer></script>
+<script src="js/admin-util.js" defer></script>
+<script src="js/admin-precos.js" defer></script>
+<script src="js/admin-cenarios.js" defer></script>
+<script src="js/admin-galeria.js" defer></script>
+<script src="js/admin-fim.js" defer></script>
+<script src="js/admin.js" defer></script>
+<div class="wrap">
+
+<div id="admin-login" class="sticker login-box">
+  <h1>Painel da Anne</h1>
+  <p>Entra com o email e a senha da sua conta pra editar o site.</p>
+  <form id="login-form">
+    <div class="campo">
+      <label for="login-email">Email</label>
+      <input type="email" id="login-email" autocomplete="username" required>
+    </div>
+    <div class="campo">
+      <label for="login-senha">Senha</label>
+      <input type="password" id="login-senha" autocomplete="current-password" required>
+    </div>
+    <p class="erro" id="login-erro" hidden></p>
+    <button class="cta" type="submit" id="login-botao" style="width:100%;margin-top:6px">Entrar</button>
+  </form>
+</div>
+
+<div id="admin-painel" hidden>
+  <div class="admin-topo">
+    <h1>Painel da Anne</h1>
+    <button class="sair" type="button" id="sair-botao">Sair</button>
+  </div>
+
+  <div class="tabs admin-abas" role="tablist" aria-label="Seção do painel">
+    <button class="tab" type="button" role="tab" aria-selected="true"  data-aba="precos">Preços &amp; Perfil</button>
+    <button class="tab" type="button" role="tab" aria-selected="false" data-aba="cenarios">Cenários</button>
+    <button class="tab" type="button" role="tab" aria-selected="false" data-aba="galeria">Galeria</button>
+    <button class="tab" type="button" role="tab" aria-selected="false" data-aba="fim">Fim Anti-Herói</button>
+  </div>
+
+  <div id="aba-precos"></div>
+  <div id="aba-cenarios" hidden></div>
+  <div id="aba-galeria" hidden></div>
+  <div id="aba-fim" hidden></div>
+</div>
+
+</div>

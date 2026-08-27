@@ -1,0 +1,74 @@
+body{padding-bottom:40px}
+
+/* ===== login ===== */
+.login-box{max-width:360px;margin:60px auto 0;padding:26px 22px}
+.login-box h1{font-size:1.8rem;margin-bottom:6px}
+.login-box p{color:var(--ink-soft);font-size:.92rem;margin-bottom:20px}
+
+/* ===== campo de formulário genérico ===== */
+.campo{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.campo label{font-weight:700;font-size:.92rem}
+.campo .ajuda{font-size:.8rem;color:var(--ink-soft)}
+.campo input[type="text"],
+.campo input[type="email"],
+.campo input[type="password"],
+.campo input[type="number"],
+.campo input[type="url"],
+.campo textarea{
+  font:inherit;padding:11px 13px;border:2.5px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);
+  box-shadow:3px 3px 0 var(--shadow);
+}
+.campo textarea{resize:vertical;min-height:80px;line-height:1.5}
+.campo input:focus-visible,.campo textarea:focus-visible{outline:3px solid var(--ring);outline-offset:2px}
+
+.linha-campos{display:flex;gap:12px;flex-wrap:wrap}
+.linha-campos .campo{flex:1;min-width:120px}
+
+.erro{background:var(--rose);color:#38222B;border:2.5px solid var(--line);border-radius:12px;padding:10px 14px;font-size:.88rem;font-weight:700}
+.sucesso{background:var(--mint);color:#38222B;border:2.5px solid var(--line);border-radius:12px;padding:10px 14px;font-size:.88rem;font-weight:700}
+
+/* ===== topo do painel ===== */
+.admin-topo{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px 0 4px}
+.admin-topo h1{font-size:1.7rem}
+.sair{background:var(--card);border:2.5px solid var(--line);border-radius:999px;padding:8px 16px;font-weight:700;font-size:.88rem;
+  cursor:pointer;box-shadow:3px 3px 0 var(--shadow)}
+
+/* ===== seções (cards com título) ===== */
+.painel-secao{padding:20px 18px 22px;margin-top:20px}
+.painel-secao h2{font-size:1.2rem;margin-bottom:14px}
+.painel-secao h3{font-size:1rem;margin:18px 0 10px}
+
+/* ===== lista de itens (cenários, galeria, personagens) ===== */
+.lista-admin{display:flex;flex-direction:column;gap:10px}
+.item-admin{display:flex;align-items:center;gap:12px;padding:10px;border:2.5px dashed var(--line);border-radius:14px;background:var(--paper)}
+.item-admin .miniatura{flex:0 0 56px;width:56px;height:56px;border-radius:10px;border:2.5px solid var(--line);object-fit:cover;background:var(--card)}
+.item-admin .miniatura-vazia{flex:0 0 56px;width:56px;height:56px;border-radius:10px;border:2.5px dashed var(--line);background:var(--card)}
+.item-admin .info{flex:1;min-width:0}
+.item-admin .titulo{font-weight:700;font-size:.94rem;display:block}
+.item-admin .sub{font-size:.8rem;color:var(--ink-soft);display:block;margin-top:2px}
+.item-admin .acoes{display:flex;gap:8px;flex:0 0 auto}
+.item-admin.oculto{opacity:.5}
+
+.botao-icone{width:38px;height:38px;border-radius:10px;border:2.5px solid var(--line);background:var(--card);cursor:pointer;
+  font-size:1rem;box-shadow:3px 3px 0 var(--shadow);transition:transform .13s ease,box-shadow .13s ease}
+.botao-icone:hover,.botao-icone:focus-visible{transform:translate(1px,1px);box-shadow:2px 2px 0 var(--shadow)}
+.botao-icone.perigo{color:var(--clay)}
+
+.cta.pequeno{padding:9px 14px;font-size:.88rem;box-shadow:3px 3px 0 var(--shadow)}
+.cta.fantasma{background:var(--paper);color:var(--ink)}
+
+/* ===== upload de imagem ===== */
+.upload-imagem{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.upload-imagem .preview-atual{flex:0 0 88px;width:88px;height:88px;border-radius:12px;border:2.5px solid var(--line);object-fit:cover;background:var(--card)}
+.upload-imagem .preview-vazia{flex:0 0 88px;width:88px;height:88px;border-radius:12px;border:2.5px dashed var(--line);background:var(--card);
+  display:flex;align-items:center;justify-content:center;font-size:.75rem;color:var(--ink-soft);text-align:center;padding:6px}
+.upload-imagem input[type="file"]{font-size:.85rem}
+
+/* ===== formulário de edição dentro de <details> ===== */
+.form-item{padding:14px 16px 16px;border-top:2.5px dashed var(--line);margin-top:10px}
+.form-acoes{display:flex;gap:10px;margin-top:6px}
+
+/* ===== abas do painel (reaproveita .tabs/.tab de orcamento.css) ===== */
+.admin-abas{flex-wrap:wrap}
+
+.carregando{font-family:"Caveat Brush","Nunito",cursive;font-size:1.05rem;color:var(--ink-soft);text-align:center;padding:20px 0}
