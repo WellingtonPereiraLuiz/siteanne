@@ -12,7 +12,7 @@ function adminCenariosIniciar(container){
   }
 
   function render(){
-    var listaHtml = itens.map(function(c, i){
+    var listaHtml = itens.map(function(c){
       if (editando === c.id) return formItem(c);
       return '<div class="item-admin" data-id-arrastar="' + c.id + '">' +
         '<span class="alca-arrastar" title="Arrastar pra reordenar">&#8801;</span>' +
@@ -20,10 +20,6 @@ function adminCenariosIniciar(container){
         '<div class="info">' +
           '<span class="titulo">' + escapeHtml(c.nome) + '</span>' +
           '<span class="sub">R$ ' + c.preco_min + ' a R$ ' + c.preco_max + ' · ordem ' + c.ordem + '</span>' +
-        '</div>' +
-        '<div class="ordem-setas">' +
-          '<button class="botao-icone" type="button" data-mover-cima="' + c.id + '" aria-label="Mover pra cima"' + (i === 0 ? " disabled" : "") + '>&#9650;</button>' +
-          '<button class="botao-icone" type="button" data-mover-baixo="' + c.id + '" aria-label="Mover pra baixo"' + (i === itens.length - 1 ? " disabled" : "") + '>&#9660;</button>' +
         '</div>' +
         '<div class="acoes">' +
           '<button class="botao-icone" type="button" data-editar="' + c.id + '" aria-label="Editar">&#9998;</button>' +
@@ -35,7 +31,7 @@ function adminCenariosIniciar(container){
     container.innerHTML =
       '<div class="painel-secao sticker">' +
         '<h2>Cenários</h2>' +
-        '<p class="ajuda" style="margin-bottom:10px">Arraste pela alcinha ou use as setas pra mudar a ordem.</p>' +
+        '<p class="ajuda" style="margin-bottom:10px">Arraste pela alcinha pra mudar a ordem.</p>' +
         '<div class="lista-admin">' + (listaHtml || '<p class="ajuda">Nenhum cenário cadastrado.</p>') + '</div>' +
         (editando === "novo" ? formItem(null) :
           '<button class="cta pequeno fantasma" type="button" id="cen-novo" style="margin-top:14px">+ Novo cenário</button>') +
@@ -83,20 +79,20 @@ function adminCenariosIniciar(container){
       });
     });
 
-    container.querySelectorAll("[data-mover-cima]").forEach(function(b){
-      b.addEventListener("click", function(){
-        moverOrdem("cenarios", itens, Number(b.dataset.moverCima), -1).then(carregar);
-      });
-    });
-    container.querySelectorAll("[data-mover-baixo]").forEach(function(b){
-      b.addEventListener("click", function(){
-        moverOrdem("cenarios", itens, Number(b.dataset.moverBaixo), 1).then(carregar);
-      });
-    });
-
     var listaEl = container.querySelector(".lista-admin");
     if (listaEl) ligarArrastar(listaEl, function(ids){
-      persistirOrdemArrastada("cenarios", ids).then(carregar);
+      /* a lista já está visualmente na ordem certa (foi reordenada durante
+         o arrasto) — só atualiza os números em memória e manda pro banco
+         em segundo plano, sem recarregar a lista inteira (isso é o que
+         deixava o arrastar lento) */
+      ids.forEach(function(id, i){
+        var item = itens.filter(function(x){ return x.id === Number(id); })[0];
+        if (item) item.ordem = i + 1;
+      });
+      persistirOrdemArrastada("cenarios", ids).catch(function(erro){
+        alert("Erro ao salvar a nova ordem: " + erro.message);
+        carregar();
+      });
     });
 
     var novoBtn = $("#cen-novo");

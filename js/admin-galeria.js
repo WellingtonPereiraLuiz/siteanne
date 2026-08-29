@@ -27,7 +27,7 @@ function adminGaleriaIniciar(container){
   }
 
   function render(){
-    var listaHtml = itens.map(function(f, i){
+    var listaHtml = itens.map(function(f){
       if (editando === f.id) return formItem(f);
       return '<div class="item-admin' + (f.visivel ? "" : " oculto") + '" data-id-arrastar="' + f.id + '">' +
         '<span class="alca-arrastar" title="Arrastar pra reordenar">&#8801;</span>' +
@@ -35,10 +35,6 @@ function adminGaleriaIniciar(container){
         '<div class="info">' +
           '<span class="titulo">' + (f.titulo ? escapeHtml(f.titulo) : "(sem título)") + '</span>' +
           '<span class="sub">ordem ' + f.ordem + (f.visivel ? "" : " · oculta") + '</span>' +
-        '</div>' +
-        '<div class="ordem-setas">' +
-          '<button class="botao-icone" type="button" data-mover-cima="' + f.id + '" aria-label="Mover pra cima"' + (i === 0 ? " disabled" : "") + '>&#9650;</button>' +
-          '<button class="botao-icone" type="button" data-mover-baixo="' + f.id + '" aria-label="Mover pra baixo"' + (i === itens.length - 1 ? " disabled" : "") + '>&#9660;</button>' +
         '</div>' +
         '<div class="acoes">' +
           '<button class="botao-icone" type="button" data-editar="' + f.id + '" aria-label="Editar">&#9998;</button>' +
@@ -50,7 +46,7 @@ function adminGaleriaIniciar(container){
     container.innerHTML =
       '<div class="painel-secao sticker">' +
         '<h2>Galeria</h2>' +
-        '<p class="ajuda" style="margin-bottom:10px">Arraste pela alcinha ou use as setas pra mudar a ordem.</p>' +
+        '<p class="ajuda" style="margin-bottom:10px">Arraste pela alcinha pra mudar a ordem.</p>' +
         '<div class="lista-admin">' + (listaHtml || '<p class="ajuda">Nenhuma foto cadastrada.</p>') + '</div>' +
         (editando === "novo" ? formItem(null) :
           '<button class="cta pequeno fantasma" type="button" id="gal-novo" style="margin-top:14px">+ Nova foto</button>') +
@@ -98,20 +94,20 @@ function adminGaleriaIniciar(container){
       });
     });
 
-    container.querySelectorAll("[data-mover-cima]").forEach(function(b){
-      b.addEventListener("click", function(){
-        moverOrdem("galeria", itens, Number(b.dataset.moverCima), -1).then(carregar);
-      });
-    });
-    container.querySelectorAll("[data-mover-baixo]").forEach(function(b){
-      b.addEventListener("click", function(){
-        moverOrdem("galeria", itens, Number(b.dataset.moverBaixo), 1).then(carregar);
-      });
-    });
-
     var listaEl = container.querySelector(".lista-admin");
     if (listaEl) ligarArrastar(listaEl, function(ids){
-      persistirOrdemArrastada("galeria", ids).then(carregar);
+      /* a lista já está visualmente na ordem certa (foi reordenada durante
+         o arrasto) — só atualiza os números em memória e manda pro banco
+         em segundo plano, sem recarregar a lista inteira (isso é o que
+         deixava o arrastar lento) */
+      ids.forEach(function(id, i){
+        var item = itens.filter(function(x){ return x.id === Number(id); })[0];
+        if (item) item.ordem = i + 1;
+      });
+      persistirOrdemArrastada("galeria", ids).catch(function(erro){
+        alert("Erro ao salvar a nova ordem: " + erro.message);
+        carregar();
+      });
     });
 
     var novoBtn = $("#gal-novo");
