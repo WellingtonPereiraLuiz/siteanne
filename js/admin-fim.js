@@ -127,14 +127,19 @@ function adminFimIniciar(container){
 
   function renderPersonagens(){
     var host = container.querySelector("#fim-personagens-admin");
-    var listaHtml = personagens.map(function(p){
+    var listaHtml = personagens.map(function(p, i){
       if (editandoPersonagem === p.id) return formPersonagem(p);
       var fotos = imagensPorPersonagem[p.id] || [];
-      return '<div class="item-admin">' +
+      return '<div class="item-admin" data-id-arrastar="' + p.id + '">' +
+        '<span class="alca-arrastar" title="Arrastar pra reordenar">&#8801;</span>' +
         (p.img_url ? '<img class="miniatura" src="' + escapeHtml(p.img_url) + '" alt="">' : '<span class="miniatura-vazia"></span>') +
         '<div class="info">' +
           '<span class="titulo">' + escapeHtml(p.nome) + '</span>' +
           '<span class="sub">' + fotos.length + ' foto(s) na galeria · ordem ' + p.ordem + '</span>' +
+        '</div>' +
+        '<div class="ordem-setas">' +
+          '<button class="botao-icone" type="button" data-mover-cima="' + p.id + '" aria-label="Mover pra cima"' + (i === 0 ? " disabled" : "") + '>&#9650;</button>' +
+          '<button class="botao-icone" type="button" data-mover-baixo="' + p.id + '" aria-label="Mover pra baixo"' + (i === personagens.length - 1 ? " disabled" : "") + '>&#9660;</button>' +
         '</div>' +
         '<div class="acoes">' +
           '<button class="botao-icone" type="button" data-editar-p="' + p.id + '" aria-label="Editar">&#9998;</button>' +
@@ -146,6 +151,7 @@ function adminFimIniciar(container){
     host.innerHTML =
       '<div class="painel-secao sticker">' +
         '<h2>Personagens</h2>' +
+        '<p class="ajuda" style="margin-bottom:10px">Arraste pela alcinha ou use as setas pra mudar a ordem.</p>' +
         '<div class="lista-admin">' + (listaHtml || '<p class="ajuda">Nenhum personagem cadastrado.</p>') + '</div>' +
         (editandoPersonagem === "novo" ? formPersonagem(null) :
           '<button class="cta pequeno fantasma" type="button" id="pz-novo" style="margin-top:14px">+ Novo personagem</button>') +
@@ -218,6 +224,24 @@ function adminFimIniciar(container){
           .then(function(){ editandoPersonagem = null; renderPersonagens(); })
           .catch(function(erro){ alert("Erro ao excluir: " + erro.message); });
       });
+    });
+
+    host.querySelectorAll("[data-mover-cima]").forEach(function(b){
+      b.addEventListener("click", function(){
+        moverOrdem("personagens", personagens, Number(b.dataset.moverCima), -1)
+          .then(recarregarPersonagens).then(renderPersonagens);
+      });
+    });
+    host.querySelectorAll("[data-mover-baixo]").forEach(function(b){
+      b.addEventListener("click", function(){
+        moverOrdem("personagens", personagens, Number(b.dataset.moverBaixo), 1)
+          .then(recarregarPersonagens).then(renderPersonagens);
+      });
+    });
+
+    var listaEl = host.querySelector(".lista-admin");
+    if (listaEl) ligarArrastar(listaEl, function(ids){
+      persistirOrdemArrastada("personagens", ids).then(recarregarPersonagens).then(renderPersonagens);
     });
 
     var novoBtn = $("#pz-novo");

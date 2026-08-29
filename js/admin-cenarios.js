@@ -12,13 +12,18 @@ function adminCenariosIniciar(container){
   }
 
   function render(){
-    var listaHtml = itens.map(function(c){
+    var listaHtml = itens.map(function(c, i){
       if (editando === c.id) return formItem(c);
-      return '<div class="item-admin">' +
+      return '<div class="item-admin" data-id-arrastar="' + c.id + '">' +
+        '<span class="alca-arrastar" title="Arrastar pra reordenar">&#8801;</span>' +
         (c.imagem_url ? '<img class="miniatura" src="' + escapeHtml(c.imagem_url) + '" alt="">' : '<span class="miniatura-vazia"></span>') +
         '<div class="info">' +
           '<span class="titulo">' + escapeHtml(c.nome) + '</span>' +
           '<span class="sub">R$ ' + c.preco_min + ' a R$ ' + c.preco_max + ' · ordem ' + c.ordem + '</span>' +
+        '</div>' +
+        '<div class="ordem-setas">' +
+          '<button class="botao-icone" type="button" data-mover-cima="' + c.id + '" aria-label="Mover pra cima"' + (i === 0 ? " disabled" : "") + '>&#9650;</button>' +
+          '<button class="botao-icone" type="button" data-mover-baixo="' + c.id + '" aria-label="Mover pra baixo"' + (i === itens.length - 1 ? " disabled" : "") + '>&#9660;</button>' +
         '</div>' +
         '<div class="acoes">' +
           '<button class="botao-icone" type="button" data-editar="' + c.id + '" aria-label="Editar">&#9998;</button>' +
@@ -30,6 +35,7 @@ function adminCenariosIniciar(container){
     container.innerHTML =
       '<div class="painel-secao sticker">' +
         '<h2>Cenários</h2>' +
+        '<p class="ajuda" style="margin-bottom:10px">Arraste pela alcinha ou use as setas pra mudar a ordem.</p>' +
         '<div class="lista-admin">' + (listaHtml || '<p class="ajuda">Nenhum cenário cadastrado.</p>') + '</div>' +
         (editando === "novo" ? formItem(null) :
           '<button class="cta pequeno fantasma" type="button" id="cen-novo" style="margin-top:14px">+ Novo cenário</button>') +
@@ -75,6 +81,22 @@ function adminCenariosIniciar(container){
           .then(function(){ editando = null; return carregar(); })
           .catch(function(erro){ alert("Erro ao excluir: " + erro.message); });
       });
+    });
+
+    container.querySelectorAll("[data-mover-cima]").forEach(function(b){
+      b.addEventListener("click", function(){
+        moverOrdem("cenarios", itens, Number(b.dataset.moverCima), -1).then(carregar);
+      });
+    });
+    container.querySelectorAll("[data-mover-baixo]").forEach(function(b){
+      b.addEventListener("click", function(){
+        moverOrdem("cenarios", itens, Number(b.dataset.moverBaixo), 1).then(carregar);
+      });
+    });
+
+    var listaEl = container.querySelector(".lista-admin");
+    if (listaEl) ligarArrastar(listaEl, function(ids){
+      persistirOrdemArrastada("cenarios", ids).then(carregar);
     });
 
     var novoBtn = $("#cen-novo");

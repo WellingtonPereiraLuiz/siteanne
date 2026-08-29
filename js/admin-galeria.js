@@ -27,13 +27,18 @@ function adminGaleriaIniciar(container){
   }
 
   function render(){
-    var listaHtml = itens.map(function(f){
+    var listaHtml = itens.map(function(f, i){
       if (editando === f.id) return formItem(f);
-      return '<div class="item-admin' + (f.visivel ? "" : " oculto") + '">' +
+      return '<div class="item-admin' + (f.visivel ? "" : " oculto") + '" data-id-arrastar="' + f.id + '">' +
+        '<span class="alca-arrastar" title="Arrastar pra reordenar">&#8801;</span>' +
         '<img class="miniatura" src="' + escapeHtml(f.imagem_url) + '" alt="">' +
         '<div class="info">' +
           '<span class="titulo">' + (f.titulo ? escapeHtml(f.titulo) : "(sem título)") + '</span>' +
           '<span class="sub">ordem ' + f.ordem + (f.visivel ? "" : " · oculta") + '</span>' +
+        '</div>' +
+        '<div class="ordem-setas">' +
+          '<button class="botao-icone" type="button" data-mover-cima="' + f.id + '" aria-label="Mover pra cima"' + (i === 0 ? " disabled" : "") + '>&#9650;</button>' +
+          '<button class="botao-icone" type="button" data-mover-baixo="' + f.id + '" aria-label="Mover pra baixo"' + (i === itens.length - 1 ? " disabled" : "") + '>&#9660;</button>' +
         '</div>' +
         '<div class="acoes">' +
           '<button class="botao-icone" type="button" data-editar="' + f.id + '" aria-label="Editar">&#9998;</button>' +
@@ -45,6 +50,7 @@ function adminGaleriaIniciar(container){
     container.innerHTML =
       '<div class="painel-secao sticker">' +
         '<h2>Galeria</h2>' +
+        '<p class="ajuda" style="margin-bottom:10px">Arraste pela alcinha ou use as setas pra mudar a ordem.</p>' +
         '<div class="lista-admin">' + (listaHtml || '<p class="ajuda">Nenhuma foto cadastrada.</p>') + '</div>' +
         (editando === "novo" ? formItem(null) :
           '<button class="cta pequeno fantasma" type="button" id="gal-novo" style="margin-top:14px">+ Nova foto</button>') +
@@ -90,6 +96,22 @@ function adminGaleriaIniciar(container){
           .then(function(){ editando = null; return carregar(); })
           .catch(function(erro){ alert("Erro ao excluir: " + erro.message); });
       });
+    });
+
+    container.querySelectorAll("[data-mover-cima]").forEach(function(b){
+      b.addEventListener("click", function(){
+        moverOrdem("galeria", itens, Number(b.dataset.moverCima), -1).then(carregar);
+      });
+    });
+    container.querySelectorAll("[data-mover-baixo]").forEach(function(b){
+      b.addEventListener("click", function(){
+        moverOrdem("galeria", itens, Number(b.dataset.moverBaixo), 1).then(carregar);
+      });
+    });
+
+    var listaEl = container.querySelector(".lista-admin");
+    if (listaEl) ligarArrastar(listaEl, function(ids){
+      persistirOrdemArrastada("galeria", ids).then(carregar);
     });
 
     var novoBtn = $("#gal-novo");
