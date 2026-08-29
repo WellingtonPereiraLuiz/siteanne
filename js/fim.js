@@ -67,12 +67,11 @@
 
     $("#fim-personagens").innerHTML = ordenados.map(function(p){
       var imagens = p.imagens.slice().sort(function(a, b){ return a.ordem - b.ordem; });
-      var capa = imagens.length ? imagens[0].url : "";
       return '<details class="fim-personagem">' +
         '<summary>' + p.nome + '</summary>' +
         '<div class="fim-personagem-corpo">' +
           '<div class="fim-personagem-arte">' +
-            imgOuPlaceholder(capa, "Arte de " + p.nome, "arte de " + p.nome + " — adicione uma foto na mini galeria do painel", true) +
+            imgOuPlaceholder(p.imgUrl, "Arte de " + p.nome, "arte de " + p.nome + " — preencha a foto principal no painel", true) +
           '</div>' +
           '<p class="fim-personagem-desc">' + p.descricao + '</p>' +
           galeriaHtml(p.nome, imagens) +
@@ -92,7 +91,7 @@
    */
   Promise.all([
     supaSelect("obra", "select=chave,valor"),
-    supaSelect("personagens", "select=id,nome,descricao,ordem&order=ordem"),
+    supaSelect("personagens", "select=id,nome,descricao,img_url,ordem&order=ordem"),
     supaSelect("personagem_imagens", "select=personagem_id,url,ordem&order=ordem")
   ]).then(function(resultados){
     var obraLinhas = resultados[0];
@@ -123,6 +122,7 @@
       return {
         nome: p.nome,
         descricao: p.descricao,
+        imgUrl: p.img_url,
         ordem: p.ordem,
         imagens: imagensPorPersonagem[p.id] || []
       };

@@ -81,12 +81,10 @@ alter table obra enable row level security;
 -- ---------- personagens ----------
 -- Um por personagem do Fim Anti-Herói (hoje é o array DADOS.personagens
 -- em js/fim.js).
--- "img_url" é uma coluna antiga (Fase 3, comparativo "antes e agora") que
--- a Fase 4 parou de usar — o site e o painel agora leem as fotos de
--- "personagem_imagens" abaixo. Ela continua aqui só porque já tinha fotos
--- reais dentro (migradas pra personagem_imagens na Etapa 4, ver
--- supabase/fase4-personagens.sql); não é mais lida nem escrita por nenhum
--- código novo.
+-- "img_url" é a foto principal do personagem — a arte grande que aparece
+-- no topo do card (igual já era desde a Fase 3). "personagem_imagens"
+-- abaixo é a galeria de fotos extras, num carrossel à parte — a Fase 4
+-- trocou o antigo comparativo "antes e agora" por essa galeria.
 create table if not exists personagens (
   id             bigint generated always as identity primary key,
   nome           text not null,

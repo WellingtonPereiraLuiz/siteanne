@@ -8,7 +8,7 @@ function adminFimIniciar(container){
 
   return Promise.all([
     authFetch(SUPA_URL + "/rest/v1/obra?select=chave,valor").then(function(r){ return r.json(); }),
-    authFetch(SUPA_URL + "/rest/v1/personagens?select=id,nome,descricao,ordem&order=ordem").then(function(r){ return r.json(); }),
+    authFetch(SUPA_URL + "/rest/v1/personagens?select=id,nome,descricao,img_url,ordem&order=ordem").then(function(r){ return r.json(); }),
     authFetch(SUPA_URL + "/rest/v1/personagem_imagens?select=id,personagem_id,url,ordem&order=ordem").then(function(r){ return r.json(); })
   ]).then(function(resultados){
     var obraPorChave = {};
@@ -114,7 +114,7 @@ function adminFimIniciar(container){
   /* === bloco "personagens" (lista + form + mini galeria) === */
 
   function recarregarPersonagens(){
-    return authFetch(SUPA_URL + "/rest/v1/personagens?select=id,nome,descricao,ordem&order=ordem")
+    return authFetch(SUPA_URL + "/rest/v1/personagens?select=id,nome,descricao,img_url,ordem&order=ordem")
       .then(function(resp){ return resp.json(); })
       .then(function(linhas){ personagens = linhas; });
   }
@@ -130,12 +130,11 @@ function adminFimIniciar(container){
     var listaHtml = personagens.map(function(p){
       if (editandoPersonagem === p.id) return formPersonagem(p);
       var fotos = imagensPorPersonagem[p.id] || [];
-      var capa = fotos.length ? fotos[0].url : "";
       return '<div class="item-admin">' +
-        (capa ? '<img class="miniatura" src="' + escapeHtml(capa) + '" alt="">' : '<span class="miniatura-vazia"></span>') +
+        (p.img_url ? '<img class="miniatura" src="' + escapeHtml(p.img_url) + '" alt="">' : '<span class="miniatura-vazia"></span>') +
         '<div class="info">' +
           '<span class="titulo">' + escapeHtml(p.nome) + '</span>' +
-          '<span class="sub">' + fotos.length + ' foto(s) · ordem ' + p.ordem + '</span>' +
+          '<span class="sub">' + fotos.length + ' foto(s) na galeria · ordem ' + p.ordem + '</span>' +
         '</div>' +
         '<div class="acoes">' +
           '<button class="botao-icone" type="button" data-editar-p="' + p.id + '" aria-label="Editar">&#9998;</button>' +
@@ -160,6 +159,10 @@ function adminFimIniciar(container){
     return '<div class="form-item">' +
       '<div class="campo"><label>Nome</label><input type="text" id="pz-nome" value="' + (vazio ? "" : escapeHtml(p.nome)) + '"></div>' +
       '<div class="campo"><label>Descrição</label><textarea id="pz-desc">' + (vazio ? "" : escapeHtml(p.descricao)) + '</textarea></div>' +
+      '<div class="upload-imagem" style="margin-bottom:12px">' +
+        (vazio || !p.img_url ? '<span class="preview-vazia">sem foto</span>' : '<img class="preview-atual" src="' + escapeHtml(p.img_url) + '" alt="">') +
+        '<div class="campo" style="flex:1;min-width:160px"><label for="pz-img">Foto principal</label><input type="file" id="pz-img" accept="image/*"></div>' +
+      '</div>' +
       '<div class="campo" style="max-width:140px"><label>Ordem</label><input type="number" id="pz-ordem" value="' + (vazio ? (personagens.length + 1) : p.ordem) + '"></div>' +
       '<p class="erro" id="pz-erro" hidden></p>' +
       '<div class="form-acoes">' +
@@ -167,12 +170,13 @@ function adminFimIniciar(container){
         '<button class="cta pequeno fantasma" type="button" id="pz-cancelar">Cancelar</button>' +
       '</div>' +
       (vazio
-        ? '<p class="ajuda" style="margin-top:14px">Salve o personagem primeiro — só dá pra adicionar fotos depois que ele já existe.</p>'
+        ? '<p class="ajuda" style="margin-top:14px">Salve o personagem primeiro — só dá pra adicionar fotos na galeria depois que ele já existe.</p>'
         : galeriaSecaoHtml(p.id)) +
     '</div>';
   }
 
-  /* mini galeria: miniaturas com campo de ordem + excluir, mais upload de foto nova */
+  /* mini galeria (fotos extras, além da principal): miniaturas com campo
+     de ordem + excluir, mais upload de foto nova */
   function galeriaSecaoHtml(personagemId){
     var fotos = imagensPorPersonagem[personagemId] || [];
     var itensHtml = fotos.map(function(im){
@@ -189,7 +193,8 @@ function adminFimIniciar(container){
     }).join("");
 
     return '<div class="painel-secao sticker" style="margin-top:16px;padding:16px 14px">' +
-      '<h3 style="margin-top:0">Fotos</h3>' +
+      '<h3 style="margin-top:0">Fotos da galeria</h3>' +
+      '<p class="ajuda" style="margin-bottom:10px">Fotos extras, além da principal — aparecem num carrossel embaixo da descrição.</p>' +
       '<div class="lista-admin">' + (itensHtml || '<p class="ajuda">Nenhuma foto ainda.</p>') + '</div>' +
       '<div class="upload-imagem" style="margin-top:12px">' +
         '<div class="campo" style="flex:1;min-width:160px"><label for="pz-img-nova">Adicionar foto</label><input type="file" id="pz-img-nova" accept="image/*"></div>' +
@@ -223,6 +228,8 @@ function adminFimIniciar(container){
 
     var salvar = $("#pz-salvar");
     if (salvar) salvar.addEventListener("click", function(){
+      var atual = editandoPersonagem === "novo" ? null : personagens.filter(function(p){ return p.id === editandoPersonagem; })[0];
+      var arquivo = $("#pz-img").files[0];
       var nome = $("#pz-nome").value.trim();
 
       if (!nome){
@@ -231,28 +238,30 @@ function adminFimIniciar(container){
         return;
       }
 
-      var corpo = {
-        nome: nome,
-        descricao: $("#pz-desc").value.trim(),
-        ordem: Number($("#pz-ordem").value)
-      };
-
       salvar.disabled = true;
 
-      (editandoPersonagem === "novo"
-        ? authFetch(SUPA_URL + "/rest/v1/personagens", { method: "POST", headers: { "Content-Type": "application/json", Prefer: "return=minimal" }, body: JSON.stringify(corpo) })
-        : authFetch(SUPA_URL + "/rest/v1/personagens?id=eq." + editandoPersonagem, { method: "PATCH", headers: { "Content-Type": "application/json", Prefer: "return=minimal" }, body: JSON.stringify(corpo) })
-      ).then(function(resp){
-        if (!resp.ok) return resp.text().then(function(t){ throw new Error(t); });
-        return recarregarPersonagens();
-      }).then(function(){
-        editandoPersonagem = null;
-        renderPersonagens();
-      }).catch(function(erro){
-        $("#pz-erro").textContent = "Erro ao salvar: " + erro.message;
-        $("#pz-erro").hidden = false;
-        salvar.disabled = false;
-      });
+      (arquivo ? authSubirImagem("personagens", arquivo) : Promise.resolve(atual ? atual.img_url : ""))
+        .then(function(imgUrl){
+          var corpo = {
+            nome: nome,
+            descricao: $("#pz-desc").value.trim(),
+            img_url: imgUrl,
+            ordem: Number($("#pz-ordem").value)
+          };
+          return editandoPersonagem === "novo"
+            ? authFetch(SUPA_URL + "/rest/v1/personagens", { method: "POST", headers: { "Content-Type": "application/json", Prefer: "return=minimal" }, body: JSON.stringify(corpo) })
+            : authFetch(SUPA_URL + "/rest/v1/personagens?id=eq." + editandoPersonagem, { method: "PATCH", headers: { "Content-Type": "application/json", Prefer: "return=minimal" }, body: JSON.stringify(corpo) });
+        }).then(function(resp){
+          if (!resp.ok) return resp.text().then(function(t){ throw new Error(t); });
+          return recarregarPersonagens();
+        }).then(function(){
+          editandoPersonagem = null;
+          renderPersonagens();
+        }).catch(function(erro){
+          $("#pz-erro").textContent = "Erro ao salvar: " + erro.message;
+          $("#pz-erro").hidden = false;
+          salvar.disabled = false;
+        });
     });
 
     /* mini galeria: mudar ordem de uma foto */
