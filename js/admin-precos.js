@@ -4,6 +4,14 @@
  * "Salvar" — assim salvar um não mexe nos outros, e um erro num bloco não
  * trava os demais.
  */
+
+/* Fundo do site (Fase 4): cor de cada caixa quando a Anne ainda não
+   escolheu nada — precisa estar fora de adminPrecosIniciar (não depois do
+   "return" lá de dentro), porque atribuição de var não tem o mesmo
+   hoisting de declaração de função: colocada depois de um return, ela
+   nunca chega a rodar e a variável fica undefined pra sempre. */
+var CORES_PADRAO_GRADIENTE = ["#ED9A6E", "#E5A0A2", "#F8D6C2", "#8A6382"];
+
 function adminPrecosIniciar(container){
   container.innerHTML = '<p class="carregando">Carregando…</p>';
 
@@ -58,10 +66,9 @@ function adminPrecosIniciar(container){
 
   /* Fundo do site (Fase 4): quatro caixas de cor, cada uma com uma
      checkbox "usar" — só as marcadas entram na mistura, na ordem em que
-     aparecem. As cores padrão são só um chute pra quando a Anne ainda não
-     escolheu nada; ela pode trocar qualquer uma. */
-  var CORES_PADRAO_GRADIENTE = ["#ED9A6E", "#E5A0A2", "#F8D6C2", "#8A6382"];
-
+     aparecem. As cores padrão (CORES_PADRAO_GRADIENTE) são só um chute
+     pra quando a Anne ainda não escolheu nada; ela pode trocar qualquer
+     uma. */
   function fundoSecaoHtml(fundo){
     var cores = fundo.cores || [];
     var caixasCor = [0, 1, 2, 3].map(function(i){
