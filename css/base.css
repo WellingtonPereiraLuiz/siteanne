@@ -29,6 +29,14 @@ body{
 }
 /* fallback pra navegador sem @view-transition: fade simples de saída (classe
    ligada por js/transicao.js) e de entrada (via @starting-style, sem JS) */
+/* fundo customizado (Fase 4, js/fundo.js): uma cor/gradiente/foto livre
+   escolhida pela Anne pode não ter contraste garantido com --ink. Uma
+   sombra leve no texto resolve sem precisar calcular contraste — e como
+   text-shadow é uma propriedade herdada, isso cobre a página inteira só
+   com essa uma regra (os cards continuam legíveis do mesmo jeito, a
+   sombra é sutil demais pra atrapalhar em cima do --card). */
+body.fundo-custom{text-shadow:0 1px 3px rgba(0,0,0,.3),0 0 1px rgba(0,0,0,.2)}
+
 body.saindo{opacity:0}
 @starting-style{
   body{opacity:0}
@@ -43,6 +51,14 @@ button{font:inherit;color:inherit}
 s{opacity:.55;font-weight:600}
 
 .sticker{background:var(--card);border:2.5px solid var(--line);border-radius:var(--r);box-shadow:5px 5px 0 var(--shadow)}
+
+/* ===== lightbox (dialog #lb) — compartilhado por orcamento.html (tabelas
+   de preço) e fimantiheroi.html (fotos de personagem), ver js/lightbox.js */
+dialog{border:none;background:transparent;padding:0;max-width:100vw;max-height:100vh}
+dialog::backdrop{background:rgba(35,15,22,.86)}
+dialog img{max-width:94vw;max-height:88vh;width:auto;border:3px solid var(--line);border-radius:12px;background:var(--card)}
+dialog .close{position:fixed;top:14px;right:14px;width:44px;height:44px;border-radius:50%;border:2.5px solid var(--line);
+  background:var(--card);color:var(--ink);font-size:1.3rem;font-weight:800;cursor:pointer;box-shadow:3px 3px 0 var(--shadow)}
 
 /* ===== grama desenhada ===== */
 .grass{display:block;margin:28px auto;width:172px;height:26px;color:var(--rose);opacity:.85}

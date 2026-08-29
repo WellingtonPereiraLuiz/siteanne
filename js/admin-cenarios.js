@@ -5,7 +5,7 @@ function adminCenariosIniciar(container){
 
   function carregar(){
     container.innerHTML = '<p class="carregando">Carregando…</p>';
-    return authFetch(SUPA_URL + "/rest/v1/cenarios?select=id,slug,nome,descricao,preco_min,preco_max,ordem&order=ordem")
+    return authFetch(SUPA_URL + "/rest/v1/cenarios?select=id,slug,nome,descricao,preco_min,preco_max,imagem_url,ordem&order=ordem")
       .then(function(resp){ return resp.json(); })
       .then(function(linhas){ itens = linhas; render(); })
       .catch(function(erro){ container.innerHTML = '<p class="erro">Não foi possível carregar: ' + escapeHtml(erro.message) + '</p>'; });
@@ -15,6 +15,7 @@ function adminCenariosIniciar(container){
     var listaHtml = itens.map(function(c){
       if (editando === c.id) return formItem(c);
       return '<div class="item-admin">' +
+        (c.imagem_url ? '<img class="miniatura" src="' + escapeHtml(c.imagem_url) + '" alt="">' : '<span class="miniatura-vazia"></span>') +
         '<div class="info">' +
           '<span class="titulo">' + escapeHtml(c.nome) + '</span>' +
           '<span class="sub">R$ ' + c.preco_min + ' a R$ ' + c.preco_max + ' · ordem ' + c.ordem + '</span>' +
@@ -44,6 +45,10 @@ function adminCenariosIniciar(container){
         '<input type="text" id="cen-slug" value="' + (vazio ? "" : escapeHtml(c.slug)) + '"' + (vazio ? "" : " disabled") + '></div>' +
       '<div class="campo"><label>Nome</label><input type="text" id="cen-nome" value="' + (vazio ? "" : escapeHtml(c.nome)) + '"></div>' +
       '<div class="campo"><label>Descrição</label><input type="text" id="cen-desc" value="' + (vazio ? "" : escapeHtml(c.descricao)) + '"></div>' +
+      '<div class="upload-imagem" style="margin-bottom:12px">' +
+        (vazio || !c.imagem_url ? '<span class="preview-vazia">sem foto</span>' : '<img class="preview-atual" src="' + escapeHtml(c.imagem_url) + '" alt="">') +
+        '<div class="campo" style="flex:1;min-width:160px"><label>Trocar foto</label><input type="file" id="cen-img" accept="image/*"></div>' +
+      '</div>' +
       '<div class="linha-campos">' +
         '<div class="campo"><label>Preço mínimo (R$)</label><input type="number" step="0.01" id="cen-min" value="' + (vazio ? 0 : c.preco_min) + '"></div>' +
         '<div class="campo"><label>Preço máximo (R$)</label><input type="number" step="0.01" id="cen-max" value="' + (vazio ? 0 : c.preco_max) + '"></div>' +
@@ -80,41 +85,49 @@ function adminCenariosIniciar(container){
 
     var salvar = $("#cen-salvar");
     if (salvar) salvar.addEventListener("click", function(){
-      var corpo = {
-        nome: $("#cen-nome").value.trim(),
-        descricao: $("#cen-desc").value.trim(),
-        preco_min: Number($("#cen-min").value),
-        preco_max: Number($("#cen-max").value),
-        ordem: Number($("#cen-ordem").value)
-      };
+      var atual = editando === "novo" ? null : itens.filter(function(c){ return c.id === editando; })[0];
+      var arquivo = $("#cen-img").files[0];
+      var nome = $("#cen-nome").value.trim();
+      var slug = editando === "novo" ? $("#cen-slug").value.trim() : null;
 
-      var requisicao;
-      if (editando === "novo"){
-        corpo.slug = $("#cen-slug").value.trim();
-        if (!corpo.nome || !corpo.slug){
-          $("#cen-erro").textContent = "Preencha pelo menos o slug e o nome.";
-          $("#cen-erro").hidden = false;
-          return;
-        }
-        requisicao = authFetch(SUPA_URL + "/rest/v1/cenarios", {
-          method: "POST", headers: { "Content-Type": "application/json", Prefer: "return=minimal" }, body: JSON.stringify(corpo)
-        });
-      } else {
-        requisicao = authFetch(SUPA_URL + "/rest/v1/cenarios?id=eq." + editando, {
-          method: "PATCH", headers: { "Content-Type": "application/json", Prefer: "return=minimal" }, body: JSON.stringify(corpo)
-        });
+      if (editando === "novo" && (!nome || !slug)){
+        $("#cen-erro").textContent = "Preencha pelo menos o slug e o nome.";
+        $("#cen-erro").hidden = false;
+        return;
       }
 
       salvar.disabled = true;
-      requisicao.then(function(resp){
-        if (!resp.ok) return resp.text().then(function(t){ throw new Error(t); });
-        editando = null;
-        return carregar();
-      }).catch(function(erro){
-        $("#cen-erro").textContent = "Erro ao salvar: " + erro.message;
-        $("#cen-erro").hidden = false;
-        salvar.disabled = false;
-      });
+
+      (arquivo ? authSubirImagem("cenarios", arquivo) : Promise.resolve(atual ? atual.imagem_url : ""))
+        .then(function(imagemUrl){
+          var corpo = {
+            nome: nome,
+            descricao: $("#cen-desc").value.trim(),
+            preco_min: Number($("#cen-min").value),
+            preco_max: Number($("#cen-max").value),
+            imagem_url: imagemUrl,
+            ordem: Number($("#cen-ordem").value)
+          };
+
+          if (editando === "novo"){
+            corpo.slug = slug;
+            return authFetch(SUPA_URL + "/rest/v1/cenarios", {
+              method: "POST", headers: { "Content-Type": "application/json", Prefer: "return=minimal" }, body: JSON.stringify(corpo)
+            });
+          }
+          return authFetch(SUPA_URL + "/rest/v1/cenarios?id=eq." + editando, {
+            method: "PATCH", headers: { "Content-Type": "application/json", Prefer: "return=minimal" }, body: JSON.stringify(corpo)
+          });
+        })
+        .then(function(resp){
+          if (!resp.ok) return resp.text().then(function(t){ throw new Error(t); });
+          editando = null;
+          return carregar();
+        }).catch(function(erro){
+          $("#cen-erro").textContent = "Erro ao salvar: " + erro.message;
+          $("#cen-erro").hidden = false;
+          salvar.disabled = false;
+        });
     });
   }
 

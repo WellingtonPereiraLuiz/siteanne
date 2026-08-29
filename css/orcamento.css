@@ -58,11 +58,13 @@ body{padding-bottom:150px}
 
 /* ===== cartões de categoria de cenário ===== */
 .cenario-cards{display:flex;flex-direction:column;gap:10px}
-.cenario-card{display:block;width:100%;text-align:left;border:2.5px solid var(--line);background:var(--paper);color:var(--ink);
-  border-radius:14px;padding:12px 14px;cursor:pointer;box-shadow:3px 3px 0 var(--shadow);
+.cenario-card{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:2.5px solid var(--line);background:var(--paper);color:var(--ink);
+  border-radius:14px;padding:10px 14px;cursor:pointer;box-shadow:3px 3px 0 var(--shadow);
   transition:transform .13s ease,box-shadow .13s ease,background .13s ease}
 .cenario-card:hover,.cenario-card:focus-visible{transform:translate(1px,1px);box-shadow:2px 2px 0 var(--shadow)}
 .cenario-card[aria-pressed="true"]{background:var(--salmon);color:#38222B;transform:translate(3px,3px);box-shadow:0 0 0 var(--shadow)}
+.cenario-card-img{flex:0 0 60px;width:60px;height:60px;border-radius:10px;border:2.5px solid var(--line);object-fit:cover;background:var(--card)}
+.cenario-card .txt{flex:1;min-width:0}
 .cenario-card .nome{display:block;font-family:"Gluten","Nunito",system-ui,sans-serif;font-weight:800;font-size:1rem}
 .cenario-card .desc{display:block;font-size:.85rem;opacity:.85;margin-top:2px}
 .cenario-card .faixa{display:block;font-size:.85rem;font-weight:700;margin-top:6px;font-variant-numeric:tabular-nums}
@@ -114,12 +116,6 @@ body{padding-bottom:150px}
   background:var(--card);box-shadow:4px 4px 0 var(--shadow);cursor:zoom-in}
 .sheets img{width:100%;height:auto}
 .sheets-hint{font-family:"Caveat Brush","Nunito",cursive;font-size:1.05rem;color:var(--ink-soft);text-align:center;margin-top:-4px}
-
-dialog{border:none;background:transparent;padding:0;max-width:100vw;max-height:100vh}
-dialog::backdrop{background:rgba(35,15,22,.86)}
-dialog img{max-width:94vw;max-height:88vh;width:auto;border:3px solid var(--line);border-radius:12px;background:var(--card)}
-dialog .close{position:fixed;top:14px;right:14px;width:44px;height:44px;border-radius:50%;border:2.5px solid var(--line);
-  background:var(--card);color:var(--ink);font-size:1.3rem;font-weight:800;cursor:pointer;box-shadow:3px 3px 0 var(--shadow)}
 
 details{border:2.5px solid var(--line);border-radius:14px;background:var(--card);box-shadow:4px 4px 0 var(--shadow);margin-bottom:12px;overflow:hidden}
 summary{cursor:pointer;padding:13px 16px;font-family:"Gluten","Nunito",system-ui,sans-serif;font-weight:700;font-size:1rem;

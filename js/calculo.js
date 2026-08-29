@@ -170,9 +170,12 @@
   function renderCenarioCards(){
     $("#cenario-cards").innerHTML = DADOS.cenarios.map(function(c){
       return '<button type="button" class="cenario-card" data-valor="' + c.id + '" aria-pressed="' + (c.id === rascunhoCenario.categoria) + '">' +
-        '<span class="nome">' + c.nome + '</span>' +
-        '<span class="desc">' + c.desc + '</span>' +
-        '<span class="faixa">' + faixa(c.min, c.max) + '</span>' +
+        (c.img ? '<img class="cenario-card-img" src="' + c.img + '" alt="" loading="lazy">' : '') +
+        '<span class="txt">' +
+          '<span class="nome">' + c.nome + '</span>' +
+          '<span class="desc">' + c.desc + '</span>' +
+          '<span class="faixa">' + faixa(c.min, c.max) + '</span>' +
+        '</span>' +
       '</button>';
     }).join("");
   }
@@ -429,19 +432,8 @@
     });
   });
 
-  /* tabelas em tamanho grande */
-  var lb = $("#lb");
-  $$(".sheets button").forEach(function(b){
-    b.addEventListener("click", function(){
-      $("#lb-img").src = b.dataset.full;
-      $("#lb-img").alt = b.querySelector("img").alt;
-      if (lb.showModal) lb.showModal();
-    });
-  });
-  if (lb){
-    lb.querySelector(".close").addEventListener("click", function(){ lb.close(); });
-    lb.addEventListener("click", function(e){ if (e.target === lb || e.target.id === "lb-img") lb.close(); });
-  }
+  /* as tabelas em tamanho grande usam o lightbox genérico de js/lightbox.js
+     (os botões já têm data-full no HTML, o resto é automático) */
 
   /* espera CONFIG/DADOS chegarem do Supabase (ver js/dados.js) antes do
      primeiro desenho — os cliques nos chips/cartões chamam render() de

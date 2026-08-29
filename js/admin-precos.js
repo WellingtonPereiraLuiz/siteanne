@@ -56,9 +56,54 @@ function adminPrecosIniciar(container){
     });
   }
 
+  /* Fundo do site (Fase 4): quatro caixas de cor, cada uma com uma
+     checkbox "usar" — só as marcadas entram na mistura, na ordem em que
+     aparecem. As cores padrão são só um chute pra quando a Anne ainda não
+     escolheu nada; ela pode trocar qualquer uma. */
+  var CORES_PADRAO_GRADIENTE = ["#ED9A6E", "#E5A0A2", "#F8D6C2", "#8A6382"];
+
+  function fundoSecaoHtml(fundo){
+    var cores = fundo.cores || [];
+    var caixasCor = [0, 1, 2, 3].map(function(i){
+      return '<label class="fundo-cor-item">' +
+        '<input type="checkbox" id="fd-grad-on-' + i + '"' + (cores[i] ? " checked" : "") + '>' +
+        '<input type="color" id="fd-grad-' + i + '" value="' + (cores[i] || CORES_PADRAO_GRADIENTE[i]) + '">' +
+      '</label>';
+    }).join("");
+
+    return (
+      '<h3>Fundo do site</h3>' +
+      '<p class="ajuda" style="margin-bottom:12px">Aparece atrás de tudo, nas 3 páginas do site (início, orçamento e Fim Anti-Herói).</p>' +
+      '<div class="linha-campos" role="radiogroup" aria-label="Tipo de fundo" style="margin-bottom:14px">' +
+        '<label><input type="radio" name="fd-tipo" value="imagem"' + (fundo.tipo === "imagem" ? " checked" : "") + '> Imagem</label>' +
+        '<label><input type="radio" name="fd-tipo" value="cor"' + (fundo.tipo === "cor" ? " checked" : "") + '> Cor sólida</label>' +
+        '<label><input type="radio" name="fd-tipo" value="gradiente"' + (fundo.tipo === "gradiente" ? " checked" : "") + '> Mistura de cores</label>' +
+      '</div>' +
+      '<div class="upload-imagem" id="fd-painel-imagem" style="margin-bottom:16px">' +
+        (fundo.url
+          ? '<img class="preview-atual" id="fd-imagem-preview" src="' + escapeHtml(fundo.url) + '" alt="">'
+          : '<span class="preview-vazia" id="fd-imagem-preview">sem foto</span>') +
+        '<div class="campo" style="flex:1;min-width:180px"><label for="fd-imagem-arquivo">Foto de fundo</label><input type="file" id="fd-imagem-arquivo" accept="image/*"></div>' +
+      '</div>' +
+      '<div class="campo" id="fd-painel-cor" style="max-width:160px;margin-bottom:16px">' +
+        '<label for="fd-cor">Cor sólida</label><input type="color" id="fd-cor" value="' + (fundo.cor || CORES_PADRAO_GRADIENTE[0]) + '">' +
+      '</div>' +
+      '<div id="fd-painel-gradiente" style="margin-bottom:16px">' +
+        '<p class="ajuda" style="margin-bottom:8px">Marque até 4 cores — quanto mais marcadas, mais misturado fica o fundo.</p>' +
+        '<div class="linha-campos">' + caixasCor + '</div>' +
+      '</div>'
+    );
+  }
+
   function render(dados){
     var precos = dados.precos, acabamentos = dados.acabamentos, descontos = dados.descontosVolume,
         comercial = dados.comercial, perfil = dados.perfil;
+
+    /* banco de quem já estava no ar antes da Fase 4 não tem "fundo" ainda —
+       preenche com um valor vazio (tipo imagem, sem url) pra não quebrar:
+       aplicarFundo() não faz nada com url vazia, então o visual padrão
+       continua igual até a Anne escolher algo de propósito */
+    perfil.fundo = perfil.fundo || { tipo: "imagem", url: "", cor: "", cores: [] };
 
     container.innerHTML =
       '<form class="painel-secao sticker" id="form-precos">' +
@@ -131,6 +176,7 @@ function adminPrecosIniciar(container){
         '</div>' +
         '<div class="campo"><label for="pe-instagram">Usuário do Instagram (sem @)</label><input type="text" id="pe-instagram" value="' + escapeHtml(perfil.instagram) + '"></div>' +
         '<div class="campo"><label for="pe-whatsapp">WhatsApp (só números, com DDI+DDD — vazio usa a DM do Instagram)</label><input type="text" id="pe-whatsapp" value="' + escapeHtml(perfil.whatsapp) + '"></div>' +
+        fundoSecaoHtml(perfil.fundo) +
         statusHtml() +
         '<button class="cta pequeno" type="submit">Salvar perfil</button>' +
       '</form>';
@@ -165,21 +211,87 @@ function adminPrecosIniciar(container){
     }, "comercial");
 
     var formPerfil = container.querySelector("#form-perfil");
+
+    /* === fundo: prévia ao vivo no próprio painel + troca dos 3 painéis === */
+
+    function tipoFundoSelecionado(){
+      var marcado = formPerfil.querySelector('input[name="fd-tipo"]:checked');
+      return marcado ? marcado.value : "imagem";
+    }
+
+    function fundoAtualDoForm(){
+      var tipo = tipoFundoSelecionado();
+      if (tipo === "cor") return { tipo: "cor", cor: byId("fd-cor").value };
+      if (tipo === "gradiente"){
+        return {
+          tipo: "gradiente",
+          cores: [0, 1, 2, 3]
+            .filter(function(i){ return byId("fd-grad-on-" + i).checked; })
+            .map(function(i){ return byId("fd-grad-" + i).value; })
+        };
+      }
+      var arquivo = byId("fd-imagem-arquivo").files[0];
+      return { tipo: "imagem", url: arquivo ? URL.createObjectURL(arquivo) : (perfil.fundo.url || "") };
+    }
+
+    function atualizarFundoPainel(){
+      var tipo = tipoFundoSelecionado();
+      byId("fd-painel-imagem").hidden = tipo !== "imagem";
+      byId("fd-painel-cor").hidden = tipo !== "cor";
+      byId("fd-painel-gradiente").hidden = tipo !== "gradiente";
+      if (typeof aplicarFundo === "function") aplicarFundo(fundoAtualDoForm(), document.body);
+    }
+
+    formPerfil.querySelectorAll('input[name="fd-tipo"], #fd-cor').forEach(function(el){
+      el.addEventListener("change", atualizarFundoPainel);
+      el.addEventListener("input", atualizarFundoPainel);
+    });
+    [0, 1, 2, 3].forEach(function(i){
+      byId("fd-grad-on-" + i).addEventListener("change", atualizarFundoPainel);
+      byId("fd-grad-" + i).addEventListener("input", atualizarFundoPainel);
+    });
+    byId("fd-imagem-arquivo").addEventListener("change", function(){
+      var arquivo = byId("fd-imagem-arquivo").files[0];
+      if (arquivo){
+        byId("fd-imagem-preview").outerHTML =
+          '<img class="preview-atual" id="fd-imagem-preview" src="' + URL.createObjectURL(arquivo) + '" alt="">';
+      }
+      atualizarFundoPainel();
+    });
+    atualizarFundoPainel();
+
     formPerfil.addEventListener("submit", function(e){
       e.preventDefault();
       var botao = formPerfil.querySelector('button[type="submit"]');
-      var arquivo = byId("pe-avatar-arquivo").files[0];
+      var arquivoAvatar = byId("pe-avatar-arquivo").files[0];
+      var arquivoFundo = byId("fd-imagem-arquivo").files[0];
+      var tipoFundo = tipoFundoSelecionado();
       botao.disabled = true;
 
-      (arquivo ? authSubirImagem("perfil", arquivo) : Promise.resolve(perfil.avatar_url))
-        .then(function(avatarUrl){
-          return salvarConfiguracao("perfil", {
-            avatar_url: avatarUrl,
-            fundo_url: perfil.fundo_url || "",
-            instagram: byId("pe-instagram").value.trim(),
-            whatsapp: byId("pe-whatsapp").value.trim()
-          });
-        })
+      Promise.all([
+        arquivoAvatar ? authSubirImagem("perfil", arquivoAvatar) : Promise.resolve(perfil.avatar_url),
+        (tipoFundo === "imagem" && arquivoFundo) ? authSubirImagem("perfil", arquivoFundo) : Promise.resolve(perfil.fundo.url || "")
+      ]).then(function(urls){
+        var avatarUrl = urls[0];
+        var fundo = tipoFundo === "cor" ? { tipo: "cor", cor: byId("fd-cor").value }
+          : tipoFundo === "gradiente" ? {
+              tipo: "gradiente",
+              cores: [0, 1, 2, 3]
+                .filter(function(i){ return byId("fd-grad-on-" + i).checked; })
+                .map(function(i){ return byId("fd-grad-" + i).value; })
+            }
+          : { tipo: "imagem", url: urls[1] };
+
+        return salvarConfiguracao("perfil", {
+          avatar_url: avatarUrl,
+          fundo: fundo,
+          instagram: byId("pe-instagram").value.trim(),
+          whatsapp: byId("pe-whatsapp").value.trim()
+        }).then(function(){
+          perfil.avatar_url = avatarUrl;
+          perfil.fundo = fundo;
+        });
+      })
         .then(function(){ mostrarStatus(formPerfil, true, "Salvo!"); })
         .catch(function(erro){ mostrarStatus(formPerfil, false, "Erro ao salvar: " + erro.message); })
         .then(function(){ botao.disabled = false; });

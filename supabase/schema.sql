@@ -81,14 +81,32 @@ alter table obra enable row level security;
 -- ---------- personagens ----------
 -- Um por personagem do Fim Anti-Herói (hoje é o array DADOS.personagens
 -- em js/fim.js).
+-- "img_url" é uma coluna antiga (Fase 3, comparativo "antes e agora") que
+-- a Fase 4 parou de usar — o site e o painel agora leem as fotos de
+-- "personagem_imagens" abaixo. Ela continua aqui só porque já tinha fotos
+-- reais dentro (migradas pra personagem_imagens na Etapa 4, ver
+-- supabase/fase4-personagens.sql); não é mais lida nem escrita por nenhum
+-- código novo.
 create table if not exists personagens (
   id             bigint generated always as identity primary key,
   nome           text not null,
   descricao      text not null default '',
-  mudancas       text not null default '',
   img_url        text not null default '',
-  img_antiga_url text not null default '',
   ordem          int not null default 0,
   atualizado_em  timestamptz not null default now()
 );
 alter table personagens enable row level security;
+
+-- ---------- personagem_imagens ----------
+-- Fase 4: o comparativo "antes e agora" de cada personagem virou uma mini
+-- galeria de fotos. Uma linha por foto; "ordem" decide a posição (a de
+-- ordem mais baixa aparece como a arte principal do personagem). Usa o
+-- bucket "personagens" que já existe no Storage — não precisa bucket novo.
+create table if not exists personagem_imagens (
+  id            bigint generated always as identity primary key,
+  personagem_id bigint not null references personagens(id) on delete cascade,
+  url           text not null,
+  ordem         int not null default 0,
+  atualizado_em timestamptz not null default now()
+);
+alter table personagem_imagens enable row level security;

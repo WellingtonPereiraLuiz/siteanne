@@ -50,51 +50,62 @@
     ligarCta("#fim-cta-apoiase", links.apoiase);
   }
 
+  /* Grade simples de miniaturas — clicar abre maior no lightbox compartilhado
+     (js/lightbox.js, mesmo <dialog id="lb"> usado pelas tabelas de preço da
+     página de orçamento). */
+  function galeriaHtml(nome, imagens){
+    if (!imagens.length) return "";
+    return '<div class="fim-galeria">' + imagens.map(function(im){
+      return '<button type="button" class="fim-galeria-item" data-full="' + im.url + '" data-alt="Foto de ' + nome + '">' +
+        '<img src="' + im.url + '" alt="" loading="lazy">' +
+      '</button>';
+    }).join("") + '</div>';
+  }
+
   function renderPersonagens(lista){
     var ordenados = lista.slice().sort(function(a, b){ return a.ordem - b.ordem; });
 
     $("#fim-personagens").innerHTML = ordenados.map(function(p){
+      var imagens = p.imagens.slice().sort(function(a, b){ return a.ordem - b.ordem; });
+      var capa = imagens.length ? imagens[0].url : "";
       return '<details class="fim-personagem">' +
         '<summary>' + p.nome + '</summary>' +
         '<div class="fim-personagem-corpo">' +
           '<div class="fim-personagem-arte">' +
-            imgOuPlaceholder(p.img, "Arte de " + p.nome, "arte de " + p.nome + " — preencha img_url na tabela personagens", true) +
+            imgOuPlaceholder(capa, "Arte de " + p.nome, "arte de " + p.nome + " — adicione uma foto na mini galeria do painel", true) +
           '</div>' +
           '<p class="fim-personagem-desc">' + p.descricao + '</p>' +
-          '<div class="fim-mudancas">' +
-            '<h3>As mudanças</h3>' +
-            '<p>' + p.mudancas + '</p>' +
-            '<div class="fim-compare">' +
-              '<div class="fim-compare-item">' +
-                '<span class="fim-compare-label">antes</span>' +
-                imgOuPlaceholder(p.imgAntiga, "Versão antiga de " + p.nome, "versão antiga — preencha img_antiga_url", true) +
-              '</div>' +
-              '<div class="fim-compare-item">' +
-                '<span class="fim-compare-label">agora</span>' +
-                imgOuPlaceholder(p.img, "Versão atual de " + p.nome, "versão atual — preencha img_url", true) +
-              '</div>' +
-            '</div>' +
-          '</div>' +
+          galeriaHtml(p.nome, imagens) +
         '</div>' +
       '</details>';
     }).join("");
   }
 
   /*
-   * A sinopse, os links e os personagens moram no Supabase (tabelas "obra"
-   * e "personagens" — ver supabase/schema.sql). "obra" guarda tudo em
-   * pares chave/valor (mesmo formato de "configuracao" em js/dados.js),
-   * então primeiro vira um objeto por chave pra ficar fácil de ler.
+   * A sinopse, os links, os personagens e as fotos de cada um moram no
+   * Supabase (tabelas "obra", "personagens" e "personagem_imagens" — ver
+   * supabase/schema.sql). "obra" guarda tudo em pares chave/valor (mesmo
+   * formato de "configuracao" em js/dados.js), então primeiro vira um
+   * objeto por chave pra ficar fácil de ler; "personagem_imagens" vira um
+   * mapa por personagem_id, pra cada personagem já sair com sua galeria
+   * pronta.
    */
   Promise.all([
     supaSelect("obra", "select=chave,valor"),
-    supaSelect("personagens", "select=nome,descricao,mudancas,img_url,img_antiga_url,ordem&order=ordem")
+    supaSelect("personagens", "select=id,nome,descricao,ordem&order=ordem"),
+    supaSelect("personagem_imagens", "select=personagem_id,url,ordem&order=ordem")
   ]).then(function(resultados){
     var obraLinhas = resultados[0];
     var personagensLinhas = resultados[1];
+    var imagensLinhas = resultados[2];
 
     var obraPorChave = {};
     obraLinhas.forEach(function(l){ obraPorChave[l.chave] = l.valor; });
+
+    var imagensPorPersonagem = {};
+    imagensLinhas.forEach(function(im){
+      (imagensPorPersonagem[im.personagem_id] = imagensPorPersonagem[im.personagem_id] || []).push(im);
+    });
 
     var obra = {
       titulo: obraPorChave.titulo || "",
@@ -112,10 +123,8 @@
       return {
         nome: p.nome,
         descricao: p.descricao,
-        mudancas: p.mudancas,
-        img: p.img_url,
-        imgAntiga: p.img_antiga_url,
-        ordem: p.ordem
+        ordem: p.ordem,
+        imagens: imagensPorPersonagem[p.id] || []
       };
     });
 

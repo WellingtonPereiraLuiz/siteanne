@@ -72,6 +72,18 @@ create policy "escrita autenticada" on personagens
   using (true)
   with check (true);
 
+-- ---------- personagem_imagens ----------
+create policy "leitura publica" on personagem_imagens
+  for select
+  to anon, authenticated
+  using (true);
+
+create policy "escrita autenticada" on personagem_imagens
+  for all
+  to authenticated
+  using (true)
+  with check (true);
+
 
 -- ============================================================
 -- Storage: buckets + políticas
