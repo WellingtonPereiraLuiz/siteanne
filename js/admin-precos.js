@@ -15,8 +15,7 @@ var CORES_PADRAO_GRADIENTE = ["#ED9A6E", "#E5A0A2", "#F8D6C2", "#8A6382"];
 function adminPrecosIniciar(container){
   container.innerHTML = '<p class="carregando">Carregando…</p>';
 
-  return authFetch(SUPA_URL + "/rest/v1/configuracao?select=chave,valor")
-    .then(function(resp){ return resp.json(); })
+  return authFetchJson(SUPA_URL + "/rest/v1/configuracao?select=chave,valor")
     .then(function(linhas){
       var porChave = {};
       linhas.forEach(function(l){ porChave[l.chave] = l.valor; });
@@ -275,30 +274,35 @@ function adminPrecosIniciar(container){
       var tipoFundo = tipoFundoSelecionado();
       botao.disabled = true;
 
-      Promise.all([
-        arquivoAvatar ? authSubirImagem("perfil", arquivoAvatar) : Promise.resolve(perfil.avatar_url),
-        (tipoFundo === "imagem" && arquivoFundo) ? authSubirImagem("perfil", arquivoFundo) : Promise.resolve(perfil.fundo.url || "")
-      ]).then(function(urls){
-        var avatarUrl = urls[0];
-        var fundo = tipoFundo === "cor" ? { tipo: "cor", cor: byId("fd-cor").value }
-          : tipoFundo === "gradiente" ? {
-              tipo: "gradiente",
-              cores: [0, 1, 2, 3]
-                .filter(function(i){ return byId("fd-grad-on-" + i).checked; })
-                .map(function(i){ return byId("fd-grad-" + i).value; })
-            }
-          : { tipo: "imagem", url: urls[1] };
+      /* um upload de cada vez (não Promise.all) — evita que duas renovações
+         de token disputem ao mesmo tempo, mesma causa do bug de ordem no
+         arrastar (ver js/admin-arrastar.js) */
+      (arquivoAvatar ? authSubirImagem("perfil", arquivoAvatar) : Promise.resolve(perfil.avatar_url))
+        .then(function(avatarUrl){
+          return ((tipoFundo === "imagem" && arquivoFundo) ? authSubirImagem("perfil", arquivoFundo) : Promise.resolve(perfil.fundo.url || ""))
+            .then(function(fundoUrl){ return [avatarUrl, fundoUrl]; });
+        })
+        .then(function(urls){
+          var avatarUrl = urls[0];
+          var fundo = tipoFundo === "cor" ? { tipo: "cor", cor: byId("fd-cor").value }
+            : tipoFundo === "gradiente" ? {
+                tipo: "gradiente",
+                cores: [0, 1, 2, 3]
+                  .filter(function(i){ return byId("fd-grad-on-" + i).checked; })
+                  .map(function(i){ return byId("fd-grad-" + i).value; })
+              }
+            : { tipo: "imagem", url: urls[1] };
 
-        return salvarConfiguracao("perfil", {
-          avatar_url: avatarUrl,
-          fundo: fundo,
-          instagram: byId("pe-instagram").value.trim(),
-          whatsapp: byId("pe-whatsapp").value.trim()
-        }).then(function(){
-          perfil.avatar_url = avatarUrl;
-          perfil.fundo = fundo;
-        });
-      })
+          return salvarConfiguracao("perfil", {
+            avatar_url: avatarUrl,
+            fundo: fundo,
+            instagram: byId("pe-instagram").value.trim(),
+            whatsapp: byId("pe-whatsapp").value.trim()
+          }).then(function(){
+            perfil.avatar_url = avatarUrl;
+            perfil.fundo = fundo;
+          });
+        })
         .then(function(){ mostrarStatus(formPerfil, true, "Salvo!"); })
         .catch(function(erro){ mostrarStatus(formPerfil, false, "Erro ao salvar: " + erro.message); })
         .then(function(){ botao.disabled = false; });

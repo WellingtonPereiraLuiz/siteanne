@@ -6,19 +6,22 @@ function adminFimIniciar(container){
   var imagensPorPersonagem = {}; // id do personagem -> array de {id, url, ordem}, ordenado
   var editandoPersonagem = null;
 
-  return Promise.all([
-    authFetch(SUPA_URL + "/rest/v1/obra?select=chave,valor").then(function(r){ return r.json(); }),
-    authFetch(SUPA_URL + "/rest/v1/personagens?select=id,nome,descricao,img_url,ordem&order=ordem").then(function(r){ return r.json(); }),
-    authFetch(SUPA_URL + "/rest/v1/personagem_imagens?select=id,personagem_id,url,ordem&order=ordem").then(function(r){ return r.json(); })
-  ]).then(function(resultados){
-    var obraPorChave = {};
-    resultados[0].forEach(function(l){ obraPorChave[l.chave] = l.valor; });
-    personagens = resultados[1];
-    montarImagensPorPersonagem(resultados[2]);
-    render(obraPorChave);
-  }).catch(function(erro){
-    container.innerHTML = '<p class="erro">Não foi possível carregar: ' + escapeHtml(erro.message) + '</p>';
-  });
+  /* as 3 buscas rodam uma de cada vez (não Promise.all) — evita que duas
+     chamadas tentem renovar o token de acesso ao mesmo tempo logo ao abrir
+     a aba (mesma causa do bug de ordem no arrastar, ver js/admin-arrastar.js) */
+  return authFetchJson(SUPA_URL + "/rest/v1/obra?select=chave,valor")
+    .then(function(obraLinhas){
+      var obraPorChave = {};
+      obraLinhas.forEach(function(l){ obraPorChave[l.chave] = l.valor; });
+      return authFetchJson(SUPA_URL + "/rest/v1/personagens?select=id,nome,descricao,img_url,ordem&order=ordem")
+        .then(function(linhas){ personagens = linhas; })
+        .then(function(){ return authFetchJson(SUPA_URL + "/rest/v1/personagem_imagens?select=id,personagem_id,url,ordem&order=ordem"); })
+        .then(function(linhas){ montarImagensPorPersonagem(linhas); })
+        .then(function(){ render(obraPorChave); });
+    })
+    .catch(function(erro){
+      container.innerHTML = '<p class="erro">Não foi possível carregar: ' + escapeHtml(erro.message) + '</p>';
+    });
 
   function montarImagensPorPersonagem(linhas){
     imagensPorPersonagem = {};
@@ -88,16 +91,24 @@ function adminFimIniciar(container){
 
       (arquivo ? authSubirImagem("personagens", arquivo) : Promise.resolve(obra.capa || ""))
         .then(function(capaUrl){
-          return Promise.all([
-            salvarObraChave("titulo", $("#ob-titulo").value.trim()),
-            salvarObraChave("gancho", $("#ob-gancho").value.trim()),
-            salvarObraChave("sinopse", $("#ob-sinopse").value.trim()),
-            salvarObraChave("apoio_texto", $("#ob-apoio").value.trim()),
-            salvarObraChave("capa", capaUrl),
-            salvarObraChave("link_tapas", $("#ob-tapas").value.trim()),
-            salvarObraChave("link_webtoon", $("#ob-webtoon").value.trim()),
-            salvarObraChave("link_apoiase", $("#ob-apoiase").value.trim())
-          ]).then(function(){ return capaUrl; });
+          /* uma chave de cada vez (não Promise.all) — evita que várias
+             renovações de token disputem ao mesmo tempo, mesma causa do
+             bug de ordem no arrastar (ver js/admin-arrastar.js) */
+          var pares = [
+            ["titulo", $("#ob-titulo").value.trim()],
+            ["gancho", $("#ob-gancho").value.trim()],
+            ["sinopse", $("#ob-sinopse").value.trim()],
+            ["apoio_texto", $("#ob-apoio").value.trim()],
+            ["capa", capaUrl],
+            ["link_tapas", $("#ob-tapas").value.trim()],
+            ["link_webtoon", $("#ob-webtoon").value.trim()],
+            ["link_apoiase", $("#ob-apoiase").value.trim()]
+          ];
+          var corrente = Promise.resolve();
+          pares.forEach(function(par){
+            corrente = corrente.then(function(){ return salvarObraChave(par[0], par[1]); });
+          });
+          return corrente.then(function(){ return capaUrl; });
         })
         .then(function(capaUrl){
           obra.capa = capaUrl;
@@ -114,14 +125,12 @@ function adminFimIniciar(container){
   /* === bloco "personagens" (lista + form + mini galeria) === */
 
   function recarregarPersonagens(){
-    return authFetch(SUPA_URL + "/rest/v1/personagens?select=id,nome,descricao,img_url,ordem&order=ordem")
-      .then(function(resp){ return resp.json(); })
+    return authFetchJson(SUPA_URL + "/rest/v1/personagens?select=id,nome,descricao,img_url,ordem&order=ordem")
       .then(function(linhas){ personagens = linhas; });
   }
 
   function recarregarImagens(){
-    return authFetch(SUPA_URL + "/rest/v1/personagem_imagens?select=id,personagem_id,url,ordem&order=ordem")
-      .then(function(resp){ return resp.json(); })
+    return authFetchJson(SUPA_URL + "/rest/v1/personagem_imagens?select=id,personagem_id,url,ordem&order=ordem")
       .then(function(linhas){ montarImagensPorPersonagem(linhas); });
   }
 
@@ -216,7 +225,8 @@ function adminFimIniciar(container){
       b.addEventListener("click", function(){
         if (!confirm("Excluir esse personagem e as fotos dele? Não dá pra desfazer.")) return;
         authFetch(SUPA_URL + "/rest/v1/personagens?id=eq." + b.dataset.excluirP, { method: "DELETE" })
-          .then(function(){ return Promise.all([recarregarPersonagens(), recarregarImagens()]); })
+          .then(function(){ return recarregarPersonagens(); })
+          .then(function(){ return recarregarImagens(); })
           .then(function(){ editandoPersonagem = null; renderPersonagens(); })
           .catch(function(erro){ alert("Erro ao excluir: " + erro.message); });
       });

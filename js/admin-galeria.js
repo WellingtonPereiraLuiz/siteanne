@@ -5,8 +5,7 @@ function adminGaleriaIniciar(container){
 
   function carregar(){
     container.innerHTML = '<p class="carregando">Carregando…</p>';
-    return authFetch(SUPA_URL + "/rest/v1/galeria?select=id,imagem_url,titulo,largura,altura,ordem,visivel&order=ordem")
-      .then(function(resp){ return resp.json(); })
+    return authFetchJson(SUPA_URL + "/rest/v1/galeria?select=id,imagem_url,titulo,largura,altura,ordem,visivel&order=ordem")
       .then(function(linhas){ itens = linhas; render(); })
       .catch(function(erro){ container.innerHTML = '<p class="erro">Não foi possível carregar: ' + escapeHtml(erro.message) + '</p>'; });
   }

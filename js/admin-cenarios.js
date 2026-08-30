@@ -5,8 +5,7 @@ function adminCenariosIniciar(container){
 
   function carregar(){
     container.innerHTML = '<p class="carregando">Carregando…</p>';
-    return authFetch(SUPA_URL + "/rest/v1/cenarios?select=id,slug,nome,descricao,preco_min,preco_max,imagem_url,ordem&order=ordem")
-      .then(function(resp){ return resp.json(); })
+    return authFetchJson(SUPA_URL + "/rest/v1/cenarios?select=id,slug,nome,descricao,preco_min,preco_max,imagem_url,ordem&order=ordem")
       .then(function(linhas){ itens = linhas; render(); })
       .catch(function(erro){ container.innerHTML = '<p class="erro">Não foi possível carregar: ' + escapeHtml(erro.message) + '</p>'; });
   }
