@@ -36,6 +36,18 @@ create policy "escrita autenticada" on cenarios
   using (true)
   with check (true);
 
+-- ---------- links ----------
+create policy "leitura publica" on links
+  for select
+  to anon, authenticated
+  using (true);
+
+create policy "escrita autenticada" on links
+  for all
+  to authenticated
+  using (true)
+  with check (true);
+
 -- ---------- galeria ----------
 create policy "leitura publica" on galeria
   for select

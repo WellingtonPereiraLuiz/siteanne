@@ -49,6 +49,8 @@ Guia rápido de "onde mexo para...":
 | mudar estrutura da página do Fim Anti-Herói | `fimantiheroi.html` |
 | mudar estilo só dessa página (accordion, botões, comparativo antes/depois) | `css/fim.css` |
 | trocar ou adicionar uma imagem | soltar o `.webp` em `assets/` e apontar o `src="assets/nome.webp"` no HTML (ou no `EXEMPLOS` de `dados.js`/`img` de `fim.js`, se for exemplo/arte usada no JS) |
+| adicionar/mudar um ícone pronto dos links da home | `js/icones.js` (objeto `ICONES_SITE`) — aparece sozinho na grade de escolha da aba "Links" do painel |
+| editar um link, cenário, preço, foto etc. no dia a dia | painel em `admin.html` (a Anne loga e edita; os dados moram no Supabase) |
 | mudar a duração ou o estilo da transição entre páginas | `css/base.css` (`@view-transition`, `.saindo`, `@starting-style`) e `js/transicao.js` |
 
 Cada HTML linka o CSS com `<link>` e o JS com `<script src>` no fim do body.
@@ -98,5 +100,9 @@ para a área de transferência antes de sair, porque a DM não aceita texto pré
 - [x] **Fase 1** — calculadora com pedido de vários itens, descontos de acabamento
       e de volume, cenários por faixa de preço
 - [x] **Fase 2** — página do Fim Anti Herói (webcomic da Anne no Tapas e Webtoon)
-- [ ] **Fase 3** — Supabase: banco, storage, login e painel de administração;
+- [x] **Fase 3** — Supabase: banco, storage, login e painel de administração;
       as imagens passam de `assets/` para arquivos no Storage
+- [x] **Fase 4** — comparativo "antes/agora" dos personagens vira galeria de fotos;
+      foto nos 3 cenários; fundo do site configurável; reordenar arrastando no painel
+- [x] **Fase 5** — links de "onde me achar" saem do HTML pra tabela `links`, com
+      ícone escolhível (prontos em `js/icones.js`) ou imagem enviada

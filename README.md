@@ -76,6 +76,22 @@ O design segue o estilo visual único de Anne: **sticker-like aesthetic** com bo
   `defer` e ficam no `<head>` (o navegador começa a baixar tudo mais cedo) e as imagens do Storage
   passaram a ter `Cache-Control` de verdade (o upload precisa usar `PUT`, não `POST` com upsert)
 
+### Painel de administração (Fases 3 → 5)
+
+- `admin.html` + `js/admin*.js`: a Anne entra com email/senha (`js/auth.js`, sem biblioteca) e
+  edita o site pelo navegador. Abas: **Preços & Perfil** (preços, acabamentos, descontos, avatar,
+  contato e o **fundo do site** — imagem, cor sólida ou mistura de cores), **Cenários**,
+  **Galeria**, **Links** e **Fim Anti-Herói** (obra + personagens + galeria de fotos de cada um).
+- Fase 4 trocou o comparativo "antes/agora" dos personagens por uma galeria de fotos
+  (`personagem_imagens`), anexou foto aos 3 cenários (bucket `cenarios`) e adicionou reordenar
+  arrastando (`js/admin-arrastar.js`).
+- Fase 5 tirou os links de "onde me achar" do `index.html` e passou pra tabela `links`: cada link
+  tem nome, URL, cor e um **ícone** — um dos prontos de `js/icones.js` ou uma imagem enviada
+  (bucket `links`). Rodar 1x: `supabase/bucket-links.sql` + `supabase/fase5-links.sql`.
+- Estado atual do banco: **7 tabelas** (`configuracao`, `cenarios`, `galeria`, `obra`,
+  `personagens`, `personagem_imagens`, `links`) e **6 buckets** (`perfil`, `galeria`,
+  `personagens`, `estaticos`, `cenarios`, `links`).
+
 ---
 
 ## 🖼️ Como Funcionam as Imagens

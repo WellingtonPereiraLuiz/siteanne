@@ -43,6 +43,9 @@ body{padding-bottom:40px}
 .item-admin{display:flex;align-items:center;gap:12px;padding:10px;border:2.5px dashed var(--line);border-radius:14px;background:var(--paper);
   transition:box-shadow .15s ease,border-color .15s ease}
 .item-admin .miniatura{flex:0 0 56px;width:56px;height:56px;border-radius:10px;border:2.5px solid var(--line);object-fit:cover;background:var(--card)}
+.item-admin .miniatura.icone{display:grid;place-items:center;overflow:hidden}
+.item-admin .miniatura.icone svg{width:26px;height:26px}
+.item-admin .miniatura.icone img{width:100%;height:100%;object-fit:cover}
 .item-admin .miniatura-vazia{flex:0 0 56px;width:56px;height:56px;border-radius:10px;border:2.5px dashed var(--line);background:var(--card)}
 .item-admin .info{flex:1;min-width:0}
 .item-admin .titulo{font-weight:700;font-size:.94rem;display:block}
@@ -88,6 +91,18 @@ body{padding-bottom:40px}
 .upload-imagem .preview-vazia{flex:0 0 88px;width:88px;height:88px;border-radius:12px;border:2.5px dashed var(--line);background:var(--card);
   display:flex;align-items:center;justify-content:center;font-size:.75rem;color:var(--ink-soft);text-align:center;padding:6px}
 .upload-imagem input[type="file"]{font-size:.85rem}
+
+/* ===== escolher ícone de link (Fase 5) ===== */
+.campo input[type="color"]{width:100%;max-width:80px;height:42px;padding:2px;border:2.5px solid var(--line);
+  border-radius:12px;background:var(--card);box-shadow:3px 3px 0 var(--shadow);cursor:pointer}
+.lk-bloco{margin-bottom:14px}
+.lk-bloco[hidden]{display:none}
+.icone-grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:8px;margin-top:4px}
+.icone-opcao{aspect-ratio:1;min-height:44px;display:grid;place-items:center;border:2.5px solid var(--line);border-radius:12px;
+  background:var(--card);color:var(--ink);cursor:pointer;box-shadow:3px 3px 0 var(--shadow);transition:transform .13s ease,box-shadow .13s ease}
+.icone-opcao svg{width:24px;height:24px}
+.icone-opcao:hover{transform:translate(1px,1px);box-shadow:2px 2px 0 var(--shadow)}
+.icone-opcao[aria-pressed="true"]{background:var(--salmon);color:#38222B;transform:translate(3px,3px);box-shadow:0 0 0 var(--shadow)}
 
 /* ===== formulário de edição dentro de <details> ===== */
 .form-item{padding:14px 16px 16px;border-top:2.5px dashed var(--line);margin-top:10px}

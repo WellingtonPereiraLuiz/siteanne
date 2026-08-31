@@ -10,6 +10,7 @@
     precos:   function(){ return adminPrecosIniciar($("#aba-precos")); },
     cenarios: function(){ return adminCenariosIniciar($("#aba-cenarios")); },
     galeria:  function(){ return adminGaleriaIniciar($("#aba-galeria")); },
+    links:    function(){ return adminLinksIniciar($("#aba-links")); },
     fim:      function(){ return adminFimIniciar($("#aba-fim")); }
   };
   var carregadas = {};

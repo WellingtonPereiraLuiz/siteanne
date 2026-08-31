@@ -45,6 +45,32 @@ create table if not exists cenarios (
 );
 alter table cenarios enable row level security;
 
+-- ---------- links ----------
+-- Os botões de "onde me achar" da página inicial (Instagram, Tapas,
+-- Webtoon, itch, ArtStation, Apoia.se, a página do Fim Anti-Herói...).
+-- Antes da Fase 5 ficavam escritos direto no index.html.
+--
+-- Ícone de cada link: ou um dos prontos (icone_tipo = 'preset', e
+-- "icone_preset" guarda a chave de js/icones.js — ex.: 'instagram'), ou
+-- uma imagem que a Anne subiu (icone_tipo = 'imagem', e "icone_url" guarda
+-- a URL no bucket "links" do Storage). Só um dos dois é usado de cada vez.
+-- "cor" é o fundo do quadradinho do ícone. "visivel" esconde um link sem
+-- apagar (igual na galeria).
+create table if not exists links (
+  id            bigint generated always as identity primary key,
+  nome          text not null,
+  descricao     text not null default '',
+  url           text not null default '',
+  icone_tipo    text not null default 'preset',
+  icone_preset  text not null default 'link',
+  icone_url     text not null default '',
+  cor           text not null default '#F3C0B4',
+  ordem         int not null default 0,
+  visivel       boolean not null default true,
+  atualizado_em timestamptz not null default now()
+);
+alter table links enable row level security;
+
 -- ---------- galeria ----------
 -- As fotos da galeria do index.html. "visivel" permite a Anne "esconder"
 -- uma foto sem apagar (útil pra testar antes de tirar de vez). "largura"

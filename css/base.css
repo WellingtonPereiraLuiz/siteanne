@@ -116,8 +116,10 @@ h1{font-size:clamp(2rem,10vw,3.6rem)}
 .link:nth-child(odd){transform:rotate(-.5deg)}
 .link:nth-child(even){transform:rotate(.5deg)}
 .link:hover,.link:focus-visible{transform:rotate(0deg) translate(3px,3px);box-shadow:2px 2px 0 var(--shadow)}
-.link .ico{flex:0 0 48px;height:48px;border-radius:12px;border:2.5px solid var(--line);display:grid;place-items:center;
+.link .ico{flex:0 0 48px;height:48px;border-radius:12px;border:2.5px solid var(--line);display:grid;place-items:center;overflow:hidden;
   font-family:"Gluten","Nunito",system-ui,sans-serif;font-weight:800;font-size:clamp(1rem,5vw,1.1rem);color:#38222B}
+.link .ico svg{width:26px;height:26px;display:block}
+.link .ico img{width:100%;height:100%;object-fit:cover}
 .link .txt{flex:1;min-width:0;display:block}
 .link .name{display:block;font-family:"Gluten","Nunito",system-ui,sans-serif;font-weight:700;font-size:clamp(1rem,4.5vw,1.05rem);line-height:1.25}
 .link .desc{display:block;font-size:clamp(0.8rem,3.5vw,0.85rem);color:var(--ink-soft);line-height:1.35;margin-top:2px}
