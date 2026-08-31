@@ -62,13 +62,21 @@
     }).join("") + '</div>';
   }
 
+  /* Miniatura da foto principal, mostrada ao lado do nome enquanto o card
+     está fechado (o CSS esconde ela quando abre, porque aí a arte grande
+     já aparece dentro). Sem foto principal, uma caixinha tracejada. */
+  function miniaturaPrincipal(p){
+    if (!p.imgUrl) return '<span class="fim-personagem-mini vazia" aria-hidden="true"></span>';
+    return '<img class="fim-personagem-mini" src="' + p.imgUrl + '" alt="" loading="lazy">';
+  }
+
   function renderPersonagens(lista){
     var ordenados = lista.slice().sort(function(a, b){ return a.ordem - b.ordem; });
 
     $("#fim-personagens").innerHTML = ordenados.map(function(p){
       var imagens = p.imagens.slice().sort(function(a, b){ return a.ordem - b.ordem; });
       return '<details class="fim-personagem">' +
-        '<summary>' + p.nome + '</summary>' +
+        '<summary>' + miniaturaPrincipal(p) + '<span class="fim-personagem-nome">' + p.nome + '</span></summary>' +
         '<div class="fim-personagem-corpo">' +
           '<div class="fim-personagem-arte">' +
             imgOuPlaceholder(p.imgUrl, "Arte de " + p.nome, "arte de " + p.nome + " — preencha a foto principal no painel", true) +

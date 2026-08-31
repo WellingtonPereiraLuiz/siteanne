@@ -43,6 +43,14 @@
 .fim-personagem summary::-webkit-details-marker{display:none}
 .fim-personagem summary::before{content:"+";font-size:1.4rem;line-height:1;color:var(--clay);flex:0 0 auto;transition:transform .2s ease}
 .fim-personagem[open] summary::before{transform:rotate(45deg)}
+.fim-personagem-nome{flex:1;min-width:0}
+
+/* miniatura da foto principal ao lado do nome (só com o card fechado) */
+.fim-personagem-mini{flex:0 0 46px;width:46px;height:46px;border-radius:10px;border:2.5px solid var(--line);
+  object-fit:cover;object-position:top center;background:var(--paper)}
+.fim-personagem-mini.vazia{border-style:dashed}
+.fim-personagem[open] summary .fim-personagem-mini{display:none}
+
 .fim-personagem-corpo{padding:0 16px 18px}
 .fim-personagem-arte{width:100%;max-width:220px;height:260px;margin:0 auto 14px;border:2.5px solid var(--line);
   border-radius:12px;overflow:hidden;background:var(--paper)}
