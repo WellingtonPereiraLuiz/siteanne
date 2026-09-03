@@ -1,5 +1,5 @@
 {
-  "buildCommand": "echo 'No build needed - HTML files are pre-built with embedded images'",
+  "buildCommand": "echo 'Site estático — sem passo de build'",
   "outputDirectory": ".",
   "framework": null,
   "env": {}

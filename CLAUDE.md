@@ -1,8 +1,9 @@
 # Site da Anne — contexto do projeto
 
-Portfólio + calculadora de encomendas da ilustradora Anne (@anne_ilustradora).
-Cliente real, trabalho freelance. O dev é iniciante em programação: comente as
-decisões não óbvias e explique o plano em português simples antes de implementar.
+Portfólio e calculadora de encomendas da ilustradora Anne (@anne_ilustradora).
+Comentários no código explicam as decisões não óbvias. Descreva o plano antes de
+implementar mudanças maiores. Respostas, comentários e textos de interface em
+português do Brasil.
 
 ## Estrutura de pastas
 
@@ -24,7 +25,8 @@ js/
   fim.js            DADOS (obra, links, personagens) e a renderização da página do Fim Anti-Herói
   transicao.js      fallback de fade entre páginas pra navegador sem @view-transition
   rise.js           animação de entrada dos elementos ao rolar
-assets/             as imagens (.webp), servidas direto — sem base64
+assets/             avatar e exemplos da calculadora (.webp) — fallback local;
+                    o site serve as imagens pelo Supabase Storage
 ```
 
 **Regra do `DADOS`:** todo preço, desconto, categoria de cenário, sinopse,
@@ -93,16 +95,9 @@ O CTA leva para o WhatsApp ou para a DM do Instagram. Em `CONFIG`, dentro de
 `js/dados.js`: se `whatsapp` estiver vazio, usa a DM. O resumo do pedido é copiado
 para a área de transferência antes de sair, porque a DM não aceita texto pré-preenchido.
 
-## Roadmap
+## Estado do banco
 
-- [x] **Fase 0** — abandonar o `build.py`, separar HTML/CSS/JS em pastas e trocar
-      o base64 por `assets/*.webp`.
-- [x] **Fase 1** — calculadora com pedido de vários itens, descontos de acabamento
-      e de volume, cenários por faixa de preço
-- [x] **Fase 2** — página do Fim Anti Herói (webcomic da Anne no Tapas e Webtoon)
-- [x] **Fase 3** — Supabase: banco, storage, login e painel de administração;
-      as imagens passam de `assets/` para arquivos no Storage
-- [x] **Fase 4** — comparativo "antes/agora" dos personagens vira galeria de fotos;
-      foto nos 3 cenários; fundo do site configurável; reordenar arrastando no painel
-- [x] **Fase 5** — links de "onde me achar" saem do HTML pra tabela `links`, com
-      ícone escolhível (prontos em `js/icones.js`) ou imagem enviada
+**7 tabelas** (`configuracao`, `cenarios`, `galeria`, `obra`, `personagens`,
+`personagem_imagens`, `links`) e **6 buckets** de Storage (`perfil`, `galeria`,
+`personagens`, `estaticos`, `cenarios`, `links`). Schema em `supabase/schema.sql`,
+políticas em `supabase/policies.sql`.

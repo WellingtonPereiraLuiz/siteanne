@@ -5,6 +5,10 @@
 // Rode DEPOIS de já ter rodado supabase/bucket-cenarios.sql no SQL Editor
 // (senão o bucket "cenarios" ainda não existe e o upload falha).
 //
+// HISTÓRICO: os arquivos vegetacao.jpeg/quarto.jpeg/cidade.jpeg foram removidos
+// de assets/ depois da migração. Para re-rodar, recupere-os do histórico do Git:
+//   git checkout <commit-antes-da-limpeza> -- assets/
+//
 // Uso (no terminal, dentro da pasta do projeto):
 //   SUPABASE_URL="https://xzpctuxezuugyjbedzhh.supabase.co" \
 //   SUPABASE_SERVICE_ROLE_KEY="cole a secret/service_role key aqui, só neste comando" \

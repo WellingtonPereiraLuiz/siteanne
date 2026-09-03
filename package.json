@@ -1,17 +1,17 @@
 {
   "name": "siteanne",
   "version": "1.0.0",
-  "description": "Portfolio & interactive order builder for illustrator Anne",
+  "description": "Portfólio e calculadora de encomendas da ilustradora Anne",
+  "private": true,
   "main": "index.html",
   "scripts": {
-    "start": "open index.html"
+    "start": "npx serve ."
   },
   "keywords": [
     "portfolio",
     "illustrator",
-    "order-builder",
-    "interactive"
+    "order-builder"
   ],
-  "author": "Wellington & Claude",
-  "license": "MIT"
+  "author": "Wellington Pereira Luiz",
+  "license": "UNLICENSED"
 }

@@ -15,6 +15,11 @@
 //
 // A service_role key nunca fica salva em nenhum arquivo — ela só existe
 // no ar enquanto esse comando roda, na memória do seu terminal.
+//
+// HISTÓRICO: as imagens-fonte que este script lia de assets/ foram removidas
+// do repositório depois da migração (o site serve tudo do Storage). Se um dia
+// precisar re-semear o banco, recupere os arquivos do histórico do Git:
+//   git checkout <commit-antes-da-limpeza> -- assets/
 
 import { readFile } from "node:fs/promises";
 import path from "node:path";
